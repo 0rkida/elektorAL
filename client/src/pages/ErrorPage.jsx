@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import error from '../assets/error.gif';
+
 const ErrorPage = () => {
   const navigate = useNavigate();
 
