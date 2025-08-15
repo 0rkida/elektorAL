@@ -38,6 +38,19 @@
     text-decoration: none;
 }
 
+.dark {
+    --color-gray-0: #0e0d14;
+    --color-gray-100: #2f2b42;
+    --color-gray-200: #45405e;
+    --color-gray-300: #7b7b7b;
+    --color-gray-400: #919191;
+    --color-gray-500: #a1a1a1;
+    --color-gray-600: #c0c0c0;
+    --color-gray-700: #e6e5e5;
+    --color-gray-800: #fafafa;
+    --color-gray-900: #ffffff;
+    }
+
 body {
     font-family: 'Source Sans 3', sans-serif;
     font-size: 0.9rem;
@@ -149,4 +162,116 @@ body .errorPage {
    line-height: 2;
 }   
 
+
+
+/* ======== NAVBAR ======== */
+nav {
+    background-color: var(--primary-color);
+    display: grid;
+    place-items: center;
+    height: 3rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 1;
+}
+
+.nav__container *{
+    color: white;
+}
+
+.nav__container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav__container div {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+}
+
+.nav__logo {
+    font-size: 1.2rem;
+    font-weight: 800;
+}
+
+.nav__toggle-btn {
+    background: transparent;
+    font-size: 1.8rem;
+    display: none;
+}
+
+.nav__container a{
+    transition: var(--transition);
+}
+
+.nav__container a:hover {
+    color: var(--primary-variant);
+}
+
+.nav__container menu {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+}
+
+.theme__toggle-btn {
+    background: transparent;
+    font-size: 1.5rem;
+    display: flex;
+    transition: var(--transition);
+}
+
+.theme__toggle-btn:hover {
+    opacity:0.75;
+}
+
+
+
+
+
+
+
+/* ======== MEDIA QUERIES (small screen) ======== */
+@media screen and (max-width: 600px) {
+    .container {
+        width: var(--container-w-sm);
+    }
+
+    nav{
+        gap: 3rem;
+    }
+
+    .nav__toggle-btn {
+        display: inline-block;
+    }
+
+    .nav__container menu {
+        position: fixed;
+        top: 4rem;
+        right:0;
+        gap: 0;
+        width: 12rem;
+    }
+
+    .nav__container menu a {
+        background: var(--color-gray-0) ;
+        color: var(--color-gray-900);
+        border-bottom: 1px solid var(--color-gray-200);
+        width: 100%;
+        display: grid;
+        place-items: center;
+        height: 4rem;
+        box-shadow: -2rem 4rem 2rem rgba(0, 0, 0, 0.1);
+
+    }
+
+    .errorPage__continer {
+        width: 100%;
+    }
+    
+}
 
