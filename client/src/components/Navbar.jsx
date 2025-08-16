@@ -8,30 +8,34 @@ import { IoSunnyOutline } from "react-icons/io5";
 
 
 const Navbar = () => {
-  const [showNav, setShowNav] = useState(false)
-  const [darkTheme, setDarkTheme] = useState(localStorage.getItem('elektoral-theme'))
+  const [showNav, setShowNav] = useState(window.innerWidth < 600 ? false : true);
+  const [darkTheme, setDarkTheme] = useState(
+    localStorage.getItem('elektoral-theme') === 'dark'
+  );
 
-  //function to close the nav menu on small screens 
+  // function to close the nav menu on small screens
   const closeNavMenu = () => {
-    if(window.innerWidth < 600 ) {
-      setShowNav(false)
+    if (window.innerWidth < 600) {
+      setShowNav(false);
     } else {
-      setShowNav(true)
+      setShowNav(true);
     }
-  }
+  };
 
   const changeThemeHandler = () => {
-
-    if(localStorage.getItem('elektoral-theme') === 'dark') {
-      localStorage.setItem('elektoral-theme', ' ')
+    if (darkTheme) {
+      localStorage.setItem('elektoral-theme', 'light');
+      setDarkTheme(false);
     } else {
-      localStorage.setItem('elektoral-theme', 'dark')}
-    setDarkTheme(localStorage.getItem('elektoral-theme')) 
+      localStorage.setItem('elektoral-theme', 'dark');
+      setDarkTheme(true);
     }
+  };
 
-    useEffect(() => {
-      document.body.className = localStorage.getItem('elektoral-theme');
-    }, [darkTheme])
+  useEffect(() => {
+    document.body.className = darkTheme ? 'dark' : 'light';
+  }, [darkTheme]);
+
   
   return (
     <nav>
@@ -40,12 +44,14 @@ const Navbar = () => {
         <div>
 
           {showNav && <menu>
-            <NavLink to ="/elections" >Zgjedhje</NavLink>
-            <NavLink to ="/results" >Rezultate</NavLink>
-            <NavLink to ="/logout" >Log out</NavLink>
+            <NavLink to ="/elections" onClick={closeNavMenu}>Zgjedhje</NavLink>
+            <NavLink to ="/results" onClick={closeNavMenu}>Rezultate</NavLink>
+            <NavLink to ="/logout" onClick={closeNavMenu}>Log out</NavLink>
           </menu> }
 
-          <button className="theme__toggle-btn" onClick={changeThemeHandler}>{darkTheme ? <IoSunnyOutline /> : <IoMoonOutline /> }</button>
+           <button className="theme__toggle-btn" onClick={changeThemeHandler}>
+      {darkTheme ? <IoSunnyOutline /> : <IoMoonOutline /> }
+    </button>
           <button className="nav__toggle-btn" onClick={() => setShowNav(!showNav)}> 
             {showNav ? <AiOutlineClose/> : <HiOutlineBars3/> }</button>
 
