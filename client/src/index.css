@@ -236,7 +236,7 @@ nav {
     display: grid;
     place-items: center;
     height: 100vh; 
-    padding-top: 3rem;
+    padding: 4rem 4rem;
 }
 
 .register__container {
@@ -284,6 +284,15 @@ nav {
 
 }
 
+.form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+
+
+
 
 
 
@@ -327,5 +336,18 @@ nav {
         width: 100%;
     }
     
+.register__container {
+        width: 90%; /* ose min(90%, 30rem) */
+        padding: 2rem;
+    }
+
+    .form__row {
+        grid-template-columns: 1fr; /* 1 kolonë për mobile */
+    }
+
+    .register form input,
+    .register form button {
+        width: 100%; /* full width për mobile */
+    }
 }
 

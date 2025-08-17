@@ -9,6 +9,7 @@ import ElectionDetails from './pages/ElectionDetails';
 import Candidates from './pages/Candidates';
 import Congrats from './pages/Congrats';
 import Logout from './pages/Logout';
+import Landing from './pages/Landing';
 
 
 
@@ -21,7 +22,12 @@ const router = createBrowserRouter([
 
       {
         index: true,
-        element: <Login />
+        element: <Landing />
+      },
+
+      {
+        path: 'login', 
+        element: <Login  />
       },
 
       {
