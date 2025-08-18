@@ -10,7 +10,7 @@ import Candidate4 from './assets/candidate4.jpeg';
 export const elections = [
   {
     id: "e1",
-    title: "Zgjedhjet për Kryetar Bashkie 2025",
+    title: "Zgjedhjet për Kryetar Bashkie 2027",
     description: "Zgjidhni kandidatin tuaj për Kryetar Bashkie.",
     thumbnail: Thumbnail1,
     candidates: ["c1", "c2"],
@@ -18,7 +18,7 @@ export const elections = [
   },
   {
     id: "e2",
-    title: "Zgjedhjet për Këshillin Bashkiak 2025",
+    title: "Zgjedhjet për Këshillin Bashkiak 2027",
     description: "Zgjidhni kandidatin tuaj për Këshillin Bashkiak.",
     thumbnail: Thumbnail2,
     candidates: ["c3", "c4"],
