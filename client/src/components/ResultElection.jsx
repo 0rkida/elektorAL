@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { candidates } from '../data'
 import CandidateRating from './CandidateRating'
 
-const ResultElection = (id, thumbnail, title) => {
+const ResultElection = ({id, thumbnail, title}) => {
     const [totalVotes, setTotalVotes] = useState(521);
 
     //get candidates that belong to this election
