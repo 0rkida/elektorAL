@@ -2,16 +2,20 @@ import React from 'react'
 import { candidates as dummyCandidates } from '../data'
 import { useParams } from 'react-router-dom' 
 import Candidate from '../components/Candidate'
+import ConfirmVote from '../components/ConfirmVote'
 
 const Candidates = () => {
 
   const {id} = useParams()
 
+  const voteCandidateModalShowing = useSelector (state= 
 
   //get candidates that belong to the election with the given id
   const candidates = dummyCandidates.filter(candidate => candidate.election === id)
-
+  
    return (
+
+    <>
     <section className="candidates">
       <header className="candidates__header">
         <h1>Voto kandidatin tënd </h1>
@@ -27,6 +31,8 @@ const Candidates = () => {
 
       </div>
     </section>
+    <ConfirmVote />
+    </>
   )
 }
 
