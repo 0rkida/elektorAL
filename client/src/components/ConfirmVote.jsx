@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux';
 import { candidates } from '../data'
+import { uiActions } from '../store/ui-slice'; 
 
 
 const ConfirmVote = () => {
     const [modalCandidate, setModalCandidate] = useState({});
+
+    const dispatch = useDispatch();
+
+    //close confirm vote modal
+    const closeCandidateModal = () => {
+        dispatch(uiActions.closeVoteCandidateModal())
+    }
 
     //get the selected candidate
 
@@ -23,7 +32,7 @@ const ConfirmVote = () => {
             <section className="modal"> 
             <div className="modal__content confirm__vote-content">
                 <h5>Ju lutemi , konfirmoni voten tuaj !</h5>
-                <div className="conifrm__vote-image">
+                <div className="confirm__vote-image">
                     <img src={modalCandidate.image} alt={modalCandidate.name} />
                 </div>
                 <h2>{modalCandidate.name?.length > 17 ? modalCandidate.name?.substring(0, 17) + "..." : 
@@ -32,7 +41,7 @@ const ConfirmVote = () => {
                     modalCandidate?.motto}</p>
 
                 <div className="confirm__vote-cta">
-                    <button className="btn">
+                    <button className="btn" onClick={closeCandidateModal}>
                         Anullo
                     </button>
 

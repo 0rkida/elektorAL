@@ -1,6 +1,7 @@
 import React from 'react'
 import { candidates as dummyCandidates } from '../data'
 import { useParams } from 'react-router-dom' 
+import { useSelector } from 'react-redux'
 import Candidate from '../components/Candidate'
 import ConfirmVote from '../components/ConfirmVote'
 
@@ -8,7 +9,7 @@ const Candidates = () => {
 
   const {id} = useParams()
 
-  const voteCandidateModalShowing = useSelector (state= 
+  const voteCandidateModalShowing = useSelector (state => state.ui.voteCandidateModalShowing)
 
   //get candidates that belong to the election with the given id
   const candidates = dummyCandidates.filter(candidate => candidate.election === id)
@@ -31,7 +32,7 @@ const Candidates = () => {
 
       </div>
     </section>
-    <ConfirmVote />
+    {voteCandidateModalShowing && <ConfirmVote />}
     </>
   )
 }

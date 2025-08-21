@@ -409,6 +409,8 @@ nav {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
     gap: 3rem;
+    justify-content: center;
+    
 }
 
 .candidate {
@@ -536,6 +538,10 @@ nav {
     gap: 1.5rem;
     margin-inline: auto;
     margin-bottom: 2rem;
+}
+
+.dark .confirm__vote-cta .btn {
+    color: white;
 }
 
 
