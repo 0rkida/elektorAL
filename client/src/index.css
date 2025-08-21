@@ -663,5 +663,13 @@ nav {
 
     }
 
+    .candidates__header {
+        width: var(--container-w-sm);
+    }
+
+    .modal__content {
+        width: var(--container-w-sm);
+    }
+
 }
 

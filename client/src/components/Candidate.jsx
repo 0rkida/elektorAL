@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { uiActions } from '../store/ui-slice'
+import { voteActions } from '../store/vote-slice';
 
 const Candidate = ({ image ,id,  name, motto }) => {
 
@@ -8,7 +9,8 @@ const Candidate = ({ image ,id,  name, motto }) => {
 
     //open confirm vote modal
     const openCandidateModal = () => {
-        dispatch(uiActions.openVoteCandidateModal(id))
+        dispatch(uiActions.openVoteCandidateModal())
+        dispatch(voteActions.changeSelectedVoteCandidate(id));
     }
 
   return (

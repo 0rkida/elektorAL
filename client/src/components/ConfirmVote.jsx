@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { candidates } from '../data'
 import { uiActions } from '../store/ui-slice'; 
 
@@ -14,18 +14,22 @@ const ConfirmVote = () => {
         dispatch(uiActions.closeVoteCandidateModal())
     }
 
+    //get selected candidate id from redux store
+
+    const selectedVoteCandidate = useSelector(state => state.vote.selectedVoteCandidate)
+
     //get the selected candidate
 
     const fetchCandidate = () => {
         candidates.find(candidate => {
-            if (candidate.id === "c1"){
-                setModalCandidate(candidate);
+            if (candidate.id === selectedVoteCandidate){
+                setModalCandidate(candidate)
             }
         })
     }
 
     useEffect(() => {
-        fetchCandidate();
+        fetchCandidate()
     }, []);
 
   return (
