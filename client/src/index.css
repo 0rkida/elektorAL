@@ -446,58 +446,128 @@ nav {
 /*============================== MODAL =========================*/
 
 .modal {
-    backdrop-filter: blur(5px);
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 2;
-    height: 100vh;
+    z-index: 999;
     width: 100vw;
-    background: rgba(0, 0, 0, 0.7);
+    height: 100vh;
     display: grid;
     place-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
 }
 
 .modal__content {
     background: var(--color-gray-0);
     width: 35rem;
+    max-width: 95%;
     border-radius: var(--radius-5);
     overflow: hidden;
+    box-shadow: 0 0 25px rgba(0,0,0,0.35);
+    animation: fadeIn 0.3s ease;
 }
 
 .modal__header {
-    background: var(--color-primary);
+    background-color: #003536;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem;
+    padding: 1.5rem 2rem;
 }
 
-.modal h4 {
-    color: white;
+.modal__header h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff; /* default */
 }
+
 
 .modal__header button {
     background: transparent;
+    border: none;
     font-size: 1.8rem;
-    color: white;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.modal__header button:hover {
+    transform: scale(1.1);
 }
 
 .modal__content form {
-    margin-top: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     padding: 2rem;
-    padding-bottom: 3rem;
 }
 
-.modal__content form input {
-    margin-top: 0.6rem;
+.modal__content form label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-gray-800);
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.modal__content form input[type="text"],
+.modal__content form input[type="file"],
+.modal__content form textarea,
+.modal__content form select {
     width: 100%;
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-3);
+    border: 1px solid var(--color-gray-300);
     background: var(--color-gray-100);
-    color: var(--color-gray-900) ;
+    color: var(--color-gray-900);
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.modal__content form input:focus,
+.modal__content form textarea:focus,
+.modal__content form select:focus {
+    border-color: var(--color-primary);
+    background: #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.modal__content form input[type="file"] {
+    padding: 0.6rem;
+    background: var(--color-gray-50);
+    cursor: pointer;
+}
+
+.modal__content form button {
+    margin-top: 0.5rem;
+    padding: 0.9rem;
+    border-radius: var(--radius-3);
+    border: none;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal__content form button:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.02);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /*===================== CONFIRM VOTE ===================*/
@@ -675,6 +745,117 @@ nav {
 
 
 
+/*=========================== ELECTION DETAILS ==========================*/
+
+.electionDetails {
+    margin: 5rem 0;
+}
+
+.electionDetails__image {
+    height: 15rem;
+    margin: 1.2rem 0 0.8rem;
+}
+
+.electionDetails__candidates{
+    margin-top: 2.5rem;
+    padding-top: 2.5rem ;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 3rem;
+  
+}
+
+.electionCandidate {
+    background: var(--color-gray-0);
+    border-radius: var(--radius-4);
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+}
+
+.electionCandidate__image {
+    height: 15rem;
+    overflow: hidden;
+}
+
+.electionCandidate h5 {
+    margin: 0.5rem 0 0.3rem;
+}
+
+.electionCandidate > div:nth-child(2) {
+    padding: 1.3rem;
+}
+
+.electionCandidate__btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 1rem;
+    background: var(--color-danger);
+    color: var(--color-gray-0);
+    padding: 0.5rem ;
+    font-size: 1.1rem;
+    border-radius: var(--radius-);
+    display: flex;
+}
+
+.electionCandidate__btn:hover{
+    background: var(--color-gray-900) ;   
+
+}
+
+.add__candidate-btn {
+    background: var(--color-gray-100);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-4);
+    font-size: 5rem;
+    color: var(--primary-color);
+    box-shadow: 0 0.8rem 0.8rem rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    display: grid;
+    place-items: center;
+    min-height: 14rem;
+
+}
+
+.voters {
+    margin-top: 6rem;
+    margin-bottom: 3rem;
+}
+
+.voters h2 {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.voters__table{
+    width: 100%;
+}
+
+.voters__table thead th {
+    text-align: left;
+    padding: 0.7rem 1.5rem;
+}
+
+.voters__table tbody td {
+    padding: 0.7rem 1.5rem;
+}
+
+.voters__table tbody tr:nth-child(odd){
+    background: var(--color-gray-0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -756,6 +937,20 @@ nav {
 
     .election__image {
         height: 100%;
+    }
+
+    .voters__table thead tr {
+        display: flex;
+        flex-direction: column;
+
+    }
+
+
+    .voters__table tbody tr {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
     }
 }
 

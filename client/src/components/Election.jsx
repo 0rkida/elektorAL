@@ -1,7 +1,18 @@
 import React from 'react'
+import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
+import { uiActions } from '../store/ui-slice'
 
 const Election = ({id, title, description, thumbnail}) => {
+  
+  //open update modal
+
+  const dispatch = useDispatch()
+
+  const openUpdateModal = () => {
+    dispatch(uiActions.openUpdateElectionModal())
+  }
+
   return (
     <article className="election">
      <div className="election__image">
@@ -14,7 +25,7 @@ const Election = ({id, title, description, thumbnail}) => {
 
             <div className="elections__cta">
                 <Link to={`/elections/${id}`} className="btn sm"> Shiko </Link>
-                <button className="btn sm primary">
+                <button className="btn sm primary" onClick={openUpdateModal}>
                     Edito
                 </button>
             </div>
