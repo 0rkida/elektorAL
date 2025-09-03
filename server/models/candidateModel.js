@@ -1,6 +1,6 @@
 const  {Schema, model, Types} = require('mongoose')
 
-const candiateSchema = new Schema({
+const candidateSchema = new Schema({
     fullName: {type: String, required: true},
     image: {type: String, required: true},
     motto: {type: String, required: true},
