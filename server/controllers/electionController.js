@@ -14,9 +14,9 @@ const addElection = async (req, res, next) => {
    try {
      //only admin can add election
  
-     // if(!req.user.isAdmin){
-     //     return next(new HttpError())
-     // }
+     if(!req.user.isAdmin){
+         return next(new HttpError("Vetem nje administrator mund ta kryeje kte veprim. ", 403))
+     }
  
      const{title, description} = req.body;
      if (!title || !description) {
@@ -127,7 +127,25 @@ const getElectionVoters = async (req, res, next) => {
 //DELETE : api/elections/:id
 //PROTECTED (ONLY ADMIN)
 const removeElection = async (req, res, next) => {
-    res.json("Delete election")
+   try {
+
+    //only admin can add election
+ 
+     if(!req.user.isAdmin){
+         return next(new HttpError("Vetem nje administrator mund ta kryeje kte veprim. ", 403))
+     }
+
+     const {id} = req.params;
+     await ElectionModel.findByIdAndDelete(id);
+
+     //delete candidates that belong to this election
+     await CandidateModel.deleteMany({election: id})
+     res.status(200).json("Zgjedhja u fshi me sukses.")
+    
+   } catch (error) {
+    return next(new HttpError(error))
+    
+   }
 }
 
 // ============= EDIT ELECTION
@@ -138,47 +156,59 @@ const updateElection = async (req, res, next) => {
 
     //only admin can add election
  
-     // if(!req.user.isAdmin){
-     //     return next(new HttpError())
-     // }
-
-     const {id} = req.params;
-     const {title, description} = req.body;
-    if (!title || !description) {
-         return next(new HttpError("Mbushni te gjitha fushat. ", 422))
-     }
- 
-     if(!req.files.thumbnail) {
-       const{thumbnail} = req.files;
-        if(thumbnail.size > 1000000) {
-         return next(new HttpError("File shum e madhe. Duhet te jete me pak se 1 mb."))
+     if(!req.user.isAdmin){
+         return next(new HttpError("Vetem nje administrator mund ta kryeje kte veprim. ", 403))
      }
 
-      let fileName = thumbnail.name;
-     fileName = fileName.split(".")
-     fileName = fileName[0] + uuid() + "." + fileName[fileName.length - 1]
-     thumbnail.mv(path.join(__dirname, "..", "uploads", fileName ), async() => {
-        if(err) {
-            return next(new HttpError(err))
+       const { id } = req.params;
+        const { title, description } = req.body;
+
+        if (!title || !description) {
+            return next(new HttpError("Mbushni te gjitha fushat.", 422));
         }
 
-        const result = await cloudinary.uploader.upload(path.join(__dirname, "..", "uploads", fileName), { resource_type: "image" });
-        if (!result.secure_url) {
-         return next(new HttpError("Fotoja nuk u ngarkua dot ne Clodinary", 422));
+        if (!req.files || !req.files.thumbnail) {
+            return next(new HttpError("Ngarkoni nje foto thumbnail.", 422));
         }
 
-        await ElectionModel.findByIdAndUpdate(id, {title, description, thumbnail:
-            result.secure_url})
+        const { thumbnail } = req.files;
 
-            res.json("Zgjedhja u perditesua me sukses", 200)
+        if (thumbnail.size > 1000000) {
+            return next(new HttpError("File shume e madhe. Duhet te jete me pak se 1MB.", 422));
+        }
 
-     })
-    }
+        let fileName = thumbnail.name;
+        fileName = fileName.split(".");
+        fileName = fileName[0] + uuid() + "." + fileName[fileName.length - 1];
 
+        thumbnail.mv(path.join(__dirname, "..", "uploads", fileName), async (err) => {
+            if (err) {
+                return next(new HttpError("Gabim gjate ruajtjes se file", 500));
+            }
 
-        
+            try {
+                const result = await cloudinary.uploader.upload(
+                    path.join(__dirname, "..", "uploads", fileName),
+                    { resource_type: "image" }
+                );
+
+                if (!result.secure_url) {
+                    return next(new HttpError("Fotoja nuk u ngarkua dot ne Cloudinary", 422));
+                }
+
+                await ElectionModel.findByIdAndUpdate(id, {
+                    title,
+                    description,
+                    thumbnail: result.secure_url,
+                });
+
+                return res.status(200).json({ message: "Zgjedhja u perditesua me sukses" });
+            } catch (error) {
+                return next(new HttpError("Ngarkimi ne Cloudinary deshtoi", 500));
+            }
+        });
     } catch (error) {
-        return next(new HttpError(error))
+        return next(new HttpError("Përditësimi i zgjedhjes dështoi", 500));
     }
 }
 
