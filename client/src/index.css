@@ -711,6 +711,12 @@ nav {
     border: 1px solid #e0e0e0;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    line-height: 1.6;
+}
+
+body.dark .election {
+    background-color: #003536;
 }
 
 .election:hover {
@@ -847,84 +853,168 @@ nav {
 
 /*========================== LANDING PAGE =================================== */
 .landing {
-  height: 100vh;
-  background: url("assets/background.png") right center no-repeat;
-  background-size: cover;
   display: flex;
-  align-items: center;
-  padding-left: 8%;
+  min-height: 100vh;
   font-family: "Segoe UI", sans-serif;
-  color: #004d40;
+  color: #212121; /* tekst neutral i zi */
 }
 
-.landing__content {
-  max-width: 500px;
+/* Kolona majtas */
+.landing__left {
+  flex: 1;
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  background-color: #fafafa; /* bezhë e bardhë e ngrohtë */
 }
 
 .landing__logo img {
-  width: 100px;
+  width: 120px;
   margin-bottom: 1rem;
 }
 
-.landing__content h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+.landing__left h1 {
+  font-size: 2.8rem;
+  color: #2e2e2e; /* grafit/gri e errët */
 }
 
-.landing__content p {
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  color: #00796b;
+.landing__left p {
+  font-size: 1.2rem;
+  color: #37474f; /* gri e errët */
 }
 
 .landing__buttons {
   display: flex;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .btn {
   padding: 0.8rem 1.5rem;
-  border: none;
   border-radius: 8px;
-  cursor: pointer;
   font-size: 1rem;
-  transition: 0.3s;
+  font-weight: 500;
   text-decoration: none;
+  transition: 0.3s;
 }
 
 .btn--primary {
-  background: #00897b;
+  background: #09504c; /* portokalli e butë */
   color: #fff;
 }
 
 .btn--primary:hover {
-  background: #00796b;
+  background: #009176;
 }
 
 .btn--secondary {
+  border: 2px solid #09504c;
+  color: #009176;
   background: transparent;
-  border: 2px solid #00897b;
-  color: #00897b;
 }
 
 .btn--secondary:hover {
-  background: #00897b;
+  background: #009176;
   color: #fff;
+}
+
+.landing__info h2,
+.landing__about h2 {
+  margin-bottom: 0.5rem;
+  color: #2e2e2e;
+}
+
+.landing__features {
+  list-style: none;
+  padding: 0;
+}
+
+.landing__features li {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Kolona djathtas */
+.landing__right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5; /* gri e hapur */
+}
+
+.landing__right img {
+  max-width: 80%;
+  height: auto;
+}
+
+/* Footer */
+.landing__footer {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 2rem;
+}
+
+/* 📱 Responsive */
+@media (max-width: 900px) {
+  .landing {
+    flex-direction: column;
+  }
+
+  .landing__right {
+    display: none; /* fsheh ilustrimin ne mobile */
+  }
 }
 
 
 
+/* =======================
+   DARK MODE - LandingPage nga Navbar
+   ======================= */
+body.dark .landing {
+  background-color: #121212;
+  color: #e0e0e0;
+}
 
+body.dark .landing__left {
+  background-color: #1e1e1e;
+}
 
+body.dark .landing__right {
+  background-color: #2e2e2e;
+}
 
+body.dark .landing__left h1,
+body.dark .landing__info h2,
+body.dark .landing__about h2 {
+  color: #f5f5f5;
+}
 
+body.dark .landing__left p,
+body.dark .landing__features li,
+body.dark .landing__footer {
+  color: #cfcfcf;
+}
 
+body.dark .btn--primary {
+  background: #009176;
+}
 
+body.dark .btn--primary:hover {
+  background: #00b68c;
+}
 
+body.dark .btn--secondary {
+  border: 2px solid #009176;
+  color: #00b68c;
+}
 
-
-
-
+body.dark .btn--secondary:hover {
+  background: #009176;
+  color: #fff;
+}
 
 
 

@@ -1,7 +1,14 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { uiActions } from '../store/ui-slice';
+import ScanIDModal from '../components/ScanIDmodal';
 
 const Register = () => {
+
+    const dispatch = useDispatch();
+    const showModal = useSelector(state => state.ui.showScanIDModal);
+
   const [userData, setUserData] = useState({
     emri: "",
     mbiemri: "",
@@ -42,9 +49,13 @@ const Register = () => {
           <p className="form__error-message">Any error from the backend.</p>
 
           {/* Buton për të skanuar ID */}
-          <button type="button" className="btn secondary" onClick={handleScanID}>
-            📷 Skanoni ID
-          </button>
+           <div>
+      <button className="btn secondary" onClick={() => dispatch(uiActions.openScanIDModal())}>
+        📷 Skanoni ID
+      </button>
+
+      {showModal && <ScanIDModal onScan={handleScanID} onClose={() => dispatch(uiActions.closeScanIDModal())} />}
+    </div>
 
           {/* Emri & Mbiemri */}
           <div className="form__row">
