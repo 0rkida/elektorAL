@@ -4,6 +4,10 @@ const {registerVoter, loginVoter, getVoter} = require("../controllers/voterContr
 const {addElection,getElection, getElections, updateElection, removeElection, 
     getCandidatesOfElection, getElectionVoters} = require("../controllers/electionController") 
 const {addCandidate, getCandidate,removeCandidate, voteCandidate } = require("../controllers/candidateControllers")
+const { getAllCounties, createCounty } = require("../controllers/countyController")
+const { getAllMunicipalities, createMunicipality } = require("../controllers/municipalityController")
+
+
 
 const authMiddleware = require('../middleware/authMiddleware')
 
@@ -26,6 +30,12 @@ router.post('/candidates', authMiddleware,addCandidate)
 router.get('/candidates/:id', authMiddleware, getCandidate)
 router.delete('/candidates/:id', authMiddleware, removeCandidate)
 router.patch('/candidates/:id', authMiddleware, voteCandidate)
+
+router.get('/counties', getAllCounties);
+router.post('/counties', authMiddleware, createCounty);
+
+router.get('/municipalities', getAllMunicipalities);
+router.post('/municipalities', authMiddleware, createMunicipality);
 
 
 

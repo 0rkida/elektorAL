@@ -8,8 +8,8 @@ const HttpError = require('../models/ErrorModel')
 //POST : api/voters/register
 const registerVoter = async (req, res, next) => {
     try {
-        const {fullName, email, password, password2} = req.body;
-        if ( !fullName || !email || !password || !password2) {
+        const {fullName, email, password, password2, county, municipality} = req.body;
+        if ( !fullName || !email || !password || !password2 || county || municipality) {
             return next(new HttpError("Mbushni te gjitha fushat ", 442))
         }
 
@@ -44,7 +44,7 @@ const registerVoter = async (req, res, next) => {
         }
 
         //save new voter to db
-        const newVoter = await VoterModel.create({fullName, email: newEmail, password: hashedPassword, isAdmin})
+        const newVoter = await VoterModel.create({fullName, email: newEmail, password: hashedPassword, isAdmin, county, municipality})
         res.status(201).json(`Votues i ri ${fullName} u krijua.`)
 
         
@@ -103,7 +103,8 @@ const getVoter = async (req, res, next) => {
     const {id} = req.params;
     try {
         const {id} = req.params;
-        const voter = await VoterModel.findById(id).select("-password")
+        const voter = await VoterModel.findById(id).select("-password").populate('county', 'name')
+    .populate('municipality', 'name')
         res.json(voter)
     } catch (error) {
         return next(HttpError("Votuesi nuk u gjend", 404))
