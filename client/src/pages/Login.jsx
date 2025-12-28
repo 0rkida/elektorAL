@@ -34,7 +34,7 @@ const Login = () => {
             name="email" 
             placeholder="E-mail ose ID personale" 
             onChange={changeInputHandler} 
-            autoComplete="true" 
+            autoComplete="true" autoFocus
           />
 
           {/* Password */}

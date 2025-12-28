@@ -1,15 +1,17 @@
-const  {Schema, model, Types} = require('mongoose')
+const { Schema, model } = require('mongoose');
 
-const voterSchema = new Schema (
-    {
-        fullName: {type: String, required: true},
-        email: {type: String, required: true},
-        password: {type: String, required: true },
-        votedElections: [{type: Types.ObjectId,ref:"Election", required: true}],
-        isAdmin: {type: Boolean, default: false},
-        municipality: { type: Types.ObjectId, ref: "Municipality", required: true }
+const voterSchema = new Schema(
+  {
+    fullName: { type: String, required: true },
+    idNumber: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    votedElections: [{ type: Schema.Types.ObjectId, ref: "Election" }],
+    isAdmin: { type: Boolean, default: false },
+    county: { type: String, required: true },
+    municipality: { type: String, required: true }
+  },
+  { timestamps: true }
+);
 
-    }, {timestamps: true}
-)
-
-module.exports = model('Voter', voterSchema)
+module.exports = model('Voter', voterSchema);
