@@ -1,11 +1,18 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { voteActions } from '../store/vote-slice';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
     email: "",
     password: ""
   });
+  const [error, setError] = useState("");
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const changeInputHandler = (e) => {
     setCredentials(prevState => ({
@@ -14,10 +21,26 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const loginVoter = async (e) => {
     e.preventDefault();
-    console.log("Login data:", credentials);
-    // këtu bën request në backend për login
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/voters/login`,
+        credentials
+      );
+
+      const newVoter = response.data;
+
+      localStorage.setItem("currentUser", JSON.stringify(newVoter));
+      dispatch(voteActions.changeCurrentVoter(newVoter));
+      navigate("/results");
+
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Diçka shkoi gabim. Provoni përsëri më vonë."
+      );
+    }
   };
 
   return (
@@ -25,33 +48,28 @@ const Login = () => {
       <div className="container register__container">
         <h2>Hyr në elektorAL</h2>
 
-        <form onSubmit={handleSubmit}>
-          <p className="form__error-message">Any error from the backend.</p>
+        <form onSubmit={loginVoter}>
+          {error && <p className="form__error-message">{error}</p>}
 
-          {/* Email ose ID */}
-          <input 
-            type="text" 
-            name="email" 
-            placeholder="E-mail ose ID personale" 
-            onChange={changeInputHandler} 
-            autoComplete="true" autoFocus
+          <input
+            type="text"
+            name="email"
+            placeholder="E-mail ose ID personale"
+            onChange={changeInputHandler}
+            autoFocus
           />
 
-          {/* Password */}
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="Fjalëkalimi" 
-            onChange={changeInputHandler} 
-            autoComplete="true" 
+          <input
+            type="password"
+            name="password"
+            placeholder="Fjalëkalimi"
+            onChange={changeInputHandler}
           />
 
-          {/* Forgot password link */}
           <p className="form__forgot">
             <Link to="/forgot-password">Keni harruar fjalëkalimin?</Link>
           </p>
 
-          {/* Redirect to register */}
           <p>
             Nuk keni llogari? <Link to="/register">Regjistrohuni</Link>
           </p>
@@ -60,7 +78,7 @@ const Login = () => {
         </form>
       </div>
     </section>
-  )
-}
+  );
+};
 
 export default Login;
