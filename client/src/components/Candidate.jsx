@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { uiActions } from '../store/ui-slice'
 import { voteActions } from '../store/vote-slice';
 
-const Candidate = ({ image ,id,  name, motto }) => {
+const Candidate = ({ image , _id: id, fullName, motto }) => {
 
   const dispatch = useDispatch();
 
@@ -11,15 +11,16 @@ const Candidate = ({ image ,id,  name, motto }) => {
     const openCandidateModal = () => {
         dispatch(uiActions.openVoteCandidateModal())
         dispatch(voteActions.changeSelectedVoteCandidate(id));
+
     }
 
   return (
     <article className="candidate">
     <div className="candidate__image">
-        <img src={image} alt={name} />
+        <img src={image} alt={fullName} />
     </div>
 
-    <h5>{name?.length > 20 ? name.substring(0, 20) + "..." : name}</h5>
+    <h5>{fullName?.length > 20 ? fullName.substring(0, 20) + "..." : fullName}</h5>
     <small>{motto?.length > 25 ? motto.substring(0, 25) + "..." : motto}</small>
     <button className="btn primary" onClick={openCandidateModal}> Voto ! </button>
     </article>

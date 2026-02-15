@@ -88,7 +88,7 @@ const Candidates = () => {
       </div>
       </> }
     </section>
-    {voteCandidateModalShowing && <ConfirmVote />}
+    {voteCandidateModalShowing && <ConfirmVote selectedElection={selectedElection}/>}
     </>
   )
 }

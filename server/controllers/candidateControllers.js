@@ -1,74 +1,101 @@
-const {v4 : uuid} = require("uuid")
-const HttpError = require('../models/ErrorModel')
-const cloudinary = require("../utils/cloudinary")
-const path = require("path")
-const mongoose = require("mongoose")
+const { v4: uuid } = require("uuid");
+const HttpError = require('../models/ErrorModel');
+const cloudinary = require("../utils/cloudinary");
+const path = require("path");
+const fs = require("fs");
+const mongoose = require("mongoose");
 
-const ElectionModel = require("../models/electionModel")
-const CandidateModel = require("../models/candidateModel")
-const VoterModel = require("../models/voterModel")
+const ElectionModel = require("../models/electionModel");
+const CandidateModel = require("../models/candidateModel");
 
-
-
-// ============= ADD CANDIDATE
-//POST : api/candidates/
-//PROTECTED (ONLY ADMIN)
+// ================= ADD CANDIDATE
+// POST : /api/candidates
+// PROTECTED (ADMIN)
 const addCandidate = async (req, res, next) => {
-     
-    try {
-        if(!req.user.isAdmin){
-             return next(new HttpError("Vetem nje administrator mund ta kryeje kte veprim. ", 403))
-         }
-
-        const {fullName, motto, currentElection} = req.body;
-        if ( !fullName || !motto) {
-            return next (new HttpError("Mbushni te gjitha fushat", 422))
-        }
-
-        if(!req.files.image){
-            return next(new HttpError("Zgjidhni nje imazh", 422))
-        }
-
-        const {image} = req.files;
-
-        //check file size
-
-        if(image.size > 1000000) {
-            return next(new HttpError("Fotoja duhet te jete me pak se 1mb. ", 422))
-        }
-
-        let fileName = image.name;
-     fileName = fileName.split(".")
-     fileName = fileName[0] + uuid() + "." + fileName[fileName.length - 1]
-
-     image.mv(path.join(__dirname, '..', 'uploads', fileName), async(err) => {
-        if(err) {
-            return next(new HttpError(err))
-        }
-        const result = await cloudinary.uploader.upload(path.join(__dirname, '..', 'uploads' , fileName), {resource_type: "image"})
-        if(!result.secure_url) {
-            return next(new HttpError("Fotoja nuk u ngarkua dot ne Cloudinary"))
-        }
-
-        //add candidate to db
-        let newCandidate = await CandidateModel.create({fullName, motto, image: result.secure_url, election:currentElection})
-
-        //get election adn push cndidate to election 
-        let election = await ElectionModel.findById(currentElection)
-
-        const sess = await mongoose.startSession()
-        sess.startTransaction()
-        await newCandidate.save({session: sess})
-        election.candidates.push(newCandidate)
-        await election.save({session:sess})
-        await sess.commitTransaction()
-
-        res.status(201).json("Kandidati u shtua me sukses")
-     })
-
-    } catch (error) {
-        return next (new HttpError(error))
+  try {
+    // admin check
+    if (!req.user || !req.user.isAdmin) {
+      return next(new HttpError("Vetëm administratori mund ta kryejë këtë veprim.", 403));
     }
+
+    const { fullName, motto, currentElection, municipality } = req.body;
+
+    // required fields check
+    if (!fullName || !motto || !currentElection || !municipality) {
+      return next(new HttpError("Mbushni të gjitha fushat.", 422));
+    }
+
+    // image check
+    if (!req.files || !req.files.image) {
+      return next(new HttpError("Zgjidhni një imazh.", 422));
+    }
+
+    const image = req.files.image;
+
+    // file size check (1MB)
+    if (image.size > 1_000_000) {
+      return next(new HttpError("Fotoja duhet të jetë më pak se 1MB.", 422));
+    }
+
+    // generate filename
+    const ext = path.extname(image.name);
+    const fileName = `${path.basename(image.name, ext)}-${uuid()}${ext}`;
+    const uploadPath = path.join(__dirname, "..", "uploads", fileName);
+
+    // move image locally
+    image.mv(uploadPath, async (err) => {
+      if (err) {
+        return next(new HttpError(err.message || "Gabim në ngarkimin e fotos.", 500));
+      }
+
+      try {
+        // upload to cloudinary
+        const result = await cloudinary.uploader.upload(uploadPath, {
+          resource_type: "image",
+          folder: "candidates"
+        });
+
+        // delete local file
+        fs.unlink(uploadPath, () => {});
+
+        if (!result.secure_url) {
+          return next(new HttpError("Ngarkimi në Cloudinary dështoi.", 500));
+        }
+
+        // start transaction
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+
+        // create candidate
+        const newCandidate = await CandidateModel.create([{
+          fullName,
+          motto,
+          municipality,
+          image: result.secure_url,
+          election: currentElection
+        }], { session: sess });
+
+        // link candidate to election
+        const election = await ElectionModel.findById(currentElection).session(sess);
+        election.candidates.push(newCandidate[0]._id);
+        await election.save({ session: sess });
+
+        await sess.commitTransaction();
+        sess.endSession();
+
+        return res.status(201).json({
+          message: "Kandidati u shtua me sukses",
+          candidate: newCandidate[0]
+        });
+
+      } catch (error) {
+        return next(new HttpError(error.message || "Shtimi i kandidatit dështoi.", 500));
+      }
+    });
+
+  } catch (error) {
+    return next(new HttpError(error.message || "Gabim serveri.", 500));
+  }
 }
 
 // ============= GET CANDIDATE
@@ -120,47 +147,75 @@ const removeCandidate = async (req, res, next) => {
 //PATCH : api/candidates/:id
 //PROTECTED 
 const voteCandidate = async (req, res, next) => {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+
     try {
-        const {id: candidateId} = req.params;
-        const {selectedElection} = req.body;
+        const { id: candidateId } = req.params;
+        const { selectedElection } = req.body;
+
+        if (!selectedElection) {
+            return next(new HttpError("Zgjedhja nuk është specifikuar.", 422));
+        }
 
         // get the candidate
-        const candidate = await CandidateModel.findById(candidateId);
-        if (!candidate) return next(new HttpError("Kandidati nuk u gjet.", 404));
+        const candidate = await CandidateModel
+            .findById(candidateId)
+            .session(sess);
+
+        if (!candidate) {
+            await sess.abortTransaction();
+            sess.endSession();
+            return next(new HttpError("Kandidati nuk u gjet.", 404));
+        }
 
         // update candidate vote count
         candidate.voteCount += 1;
-        await candidate.save();
-
-        // start session
-        const sess = await mongoose.startSession();
-        sess.startTransaction();
+        await candidate.save({ session: sess }); // 
 
         // get the current voter
-        let voter = await VoterModel.findById(req.user.id).session(sess);
-        if (!voter) return next(new HttpError("Votuesi nuk u gjet.", 404));
+        let voter = await VoterModel
+            .findById(req.user.id)
+            .session(sess);
+
+        if (!voter) {
+            await sess.abortTransaction();
+            sess.endSession();
+            return next(new HttpError("Votuesi nuk u gjet.", 404));
+        }
 
         // get selected election
-        let election = await ElectionModel.findById(selectedElection).session(sess);
-        if (!election) return next(new HttpError("Zgjedhja nuk u gjet.", 404));
+        let election = await ElectionModel
+            .findById(selectedElection)
+            .session(sess);
+
+        if (!election) {
+            await sess.abortTransaction();
+            sess.endSession();
+            return next(new HttpError("Zgjedhja nuk u gjet.", 404));
+        }
 
         // update relations
         election.voters.push(voter._id);
         voter.votedElections.push(election._id);
 
-        await election.save({session:sess});
-        await voter.save({session:sess});
+        await election.save({ session: sess });
+        await voter.save({ session: sess, validateBeforeSave: false });
+
 
         await sess.commitTransaction();
         sess.endSession();
 
-        return res.status(200).json("Vota juaj u regjistrua me sukses !");
-        
+        return res.status(200).json(voter.votedElections);
+
     } catch (error) {
+        await sess.abortTransaction(); 
+        sess.endSession();            
         console.error(error);
         return next(new HttpError("Votimi dështoi.", 500));
     }
-}
+};
+
 
 
 
