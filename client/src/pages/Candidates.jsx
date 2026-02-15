@@ -4,26 +4,81 @@ import { useParams } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Candidate from '../components/Candidate'
 import ConfirmVote from '../components/ConfirmVote'
+import { useState, useEffect } from 'react'
+import axios from 'axios' 
 
 const Candidates = () => {
 
-  const {id} = useParams()
+  const {id: selectedElection} = useParams()
+  const [candidates, setCandidates] = useState([])
+  const [canVote, setCanVote] = useState(true)
 
   const voteCandidateModalShowing = useSelector (state => state.ui.voteCandidateModalShowing)
+  const token = useSelector(state => state?.vote?.currentVoter?.token)
 
-  //get candidates that belong to the election with the given id
-  const candidates = dummyCandidates.filter(candidate => candidate.election === id)
+  const voterId = useSelector(state => state?.vote?.currentVoter?.id)
+  const votedElections = useSelector(state => state?.vote?.currentVoter?.votedElections)
+
+  const getCandidates = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/elections/${selectedElection}/candidates`,
+        {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}) 
+      setCandidates(response.data)
+
+      } catch (error) {
+        console.error(error)
+      }
+
+    }
+
+
   
-   return (
+
+  // if (votedElection.includes(selectedElection)) 
+  //   {setCanVote(false);
+  //   }
+
+  //check if voter has already voted
+  // const getVoter = async () => {
+  //   try {
+  //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/voters/${voterId}`,
+  //       {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}) 
+  //     const votedElectionS = await response.data.votedElections;
+  //     if (votedElectionS.includes(selectedElection)) {
+  //       setCanVote(false);
+  //     }
+  // }
+  //   catch (error) {
+  //     console.error(error)
+  //   }
+  // }
+
+  useEffect(() => {
+    getCandidates()
+    // getVoter()
+
+    if (votedElections.includes(selectedElection)) {
+        setCanVote(false);
+      }
+  }, [])
+
+
+  return (
 
     <>
     <section className="candidates">
-      <header className="candidates__header">
-        <h1>Voto kandidatin tënd </h1>
+      {!canVote ?  <header className="candidates__header"> 
+      <h1>Ju keni votuar tashme </h1>
+        <p>Ju lejoheni te votoni vetem nje here ne kete zgjedhje. Ju lutem votoni ne nje zgjedhje tjeter ose mbylleni procesin e votimit.</p>
+      </header> : <> {candidates.length > 0 ? 
+      <header className="candidates__header"> 
+      <h1>Voto kandidatin tënd </h1>
         <p>Këta janë kandidatët për këto zgjedhje. Ju ftojmë të votoni një herë me qetësi dhe përgjegjësi, 
           duke siguruar që çdo votë të ketë vlerën e saj.</p>
-      </header>
-
+      </header> : <header className="candidates__header"> 
+      <h1>Zgjedhje Joaktive </h1>
+        <p>Nuk u gjeten kandidate per kete zgjedhje, ju lutemi provojeni me vone.</p>
+      </header>}
       <div className="container candidates__container">
         {
           candidates.map(candidate => <Candidate key = {candidate.id} {...candidate} />)
@@ -31,6 +86,7 @@ const Candidates = () => {
 
 
       </div>
+      </> }
     </section>
     {voteCandidateModalShowing && <ConfirmVote />}
     </>
