@@ -158,7 +158,6 @@ const voteCandidate = async (req, res, next) => {
             return next(new HttpError("Zgjedhja nuk është specifikuar.", 422));
         }
 
-        // get the candidate
         const candidate = await CandidateModel
             .findById(candidateId)
             .session(sess);
@@ -169,12 +168,7 @@ const voteCandidate = async (req, res, next) => {
             return next(new HttpError("Kandidati nuk u gjet.", 404));
         }
 
-        // update candidate vote count
-        candidate.voteCount += 1;
-        await candidate.save({ session: sess }); // 
-
-        // get the current voter
-        let voter = await VoterModel
+        const voter = await VoterModel
             .findById(req.user.id)
             .session(sess);
 
@@ -184,8 +178,7 @@ const voteCandidate = async (req, res, next) => {
             return next(new HttpError("Votuesi nuk u gjet.", 404));
         }
 
-        // get selected election
-        let election = await ElectionModel
+        const election = await ElectionModel
             .findById(selectedElection)
             .session(sess);
 
@@ -195,13 +188,23 @@ const voteCandidate = async (req, res, next) => {
             return next(new HttpError("Zgjedhja nuk u gjet.", 404));
         }
 
-        // update relations
+        // ❌ MOS LEJO VOTIM TË DYFISHTË
+        if (voter.votedElections.includes(election._id)) {
+            await sess.abortTransaction();
+            sess.endSession();
+            return next(
+                new HttpError("Ju keni votuar tashmë në këtë zgjedhje.", 403)
+            );
+        }
+
+        // update everything
+        candidate.voteCount += 1;
         election.voters.push(voter._id);
         voter.votedElections.push(election._id);
 
+        await candidate.save({ session: sess });
         await election.save({ session: sess });
         await voter.save({ session: sess, validateBeforeSave: false });
-
 
         await sess.commitTransaction();
         sess.endSession();
@@ -209,14 +212,12 @@ const voteCandidate = async (req, res, next) => {
         return res.status(200).json(voter.votedElections);
 
     } catch (error) {
-        await sess.abortTransaction(); 
-        sess.endSession();            
+        await sess.abortTransaction();
+        sess.endSession();
         console.error(error);
         return next(new HttpError("Votimi dështoi.", 500));
     }
 };
-
-
 
 
 module.exports = {addCandidate, getCandidate,removeCandidate, voteCandidate }

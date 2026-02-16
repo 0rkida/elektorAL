@@ -5,7 +5,7 @@ import { voteActions } from '../store/vote-slice'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-const ConfirmVote = () => {
+const ConfirmVote = ({selectedElection}) => {
   const [modalCandidate, setModalCandidate] = useState(null)
 
   const dispatch = useDispatch()
@@ -25,9 +25,7 @@ const ConfirmVote = () => {
     state => state?.vote?.currentVoter
   )
 
-  const selectedElection = useSelector(
-  state => state.vote.selectedElection
-);
+
 
 
 
@@ -45,7 +43,7 @@ const ConfirmVote = () => {
         }
       )
 
-      setModalCandidate(response.data) // ✅ KRITIKE
+      setModalCandidate(response.data) 
 
     } catch (error) {
       console.error(error)
@@ -64,8 +62,7 @@ const ConfirmVote = () => {
     const response = await axios.patch(
       `${process.env.REACT_APP_API_URL}/candidates/${selectedVoteCandidate}`,
       {
-        selectedElection: electionId
-      },
+        selectedElection },
       {
         withCredentials: true,
         headers: { Authorization: `Bearer ${token}` }
@@ -86,6 +83,8 @@ const ConfirmVote = () => {
   } catch (error) {
     console.error(error);
   }
+
+  closeCandidateModal();
 };
 
   useEffect(() => {

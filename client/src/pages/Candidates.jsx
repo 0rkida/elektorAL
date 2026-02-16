@@ -43,8 +43,8 @@ const Candidates = () => {
   //   try {
   //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/voters/${voterId}`,
   //       {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}) 
-  //     const votedElectionS = await response.data.votedElections;
-  //     if (votedElectionS.includes(selectedElection)) {
+  //     const votedElections = await response.data.votedElections;
+  //     if (votedElections.includes(selectedElection)) {
   //       setCanVote(false);
   //     }
   // }
@@ -54,13 +54,22 @@ const Candidates = () => {
   // }
 
   useEffect(() => {
+  if (votedElections.includes(selectedElection)) {
+    setCanVote(false);
+  } else {
+    setCanVote(true);
+  }
+}, [votedElections, selectedElection]);
+
+
+  useEffect(() => {
     getCandidates()
     // getVoter()
 
-    if (votedElections.includes(selectedElection)) {
-        setCanVote(false);
-      }
-  }, [])
+    // if (votedElections.includes(selectedElection)) {
+    //     setCanVote(false);
+    //   }
+  }, [selectedElection])
 
 
   return (
@@ -81,7 +90,7 @@ const Candidates = () => {
       </header>}
       <div className="container candidates__container">
         {
-          candidates.map(candidate => <Candidate key = {candidate.id} {...candidate} />)
+          candidates.map(candidate => <Candidate key = {candidate._id} {...candidate} />)
         }
 
 

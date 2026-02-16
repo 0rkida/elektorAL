@@ -3,16 +3,18 @@ import { useDispatch } from 'react-redux'
 import { uiActions } from '../store/ui-slice'
 import { voteActions } from '../store/vote-slice';
 
+
 const Candidate = ({ image , _id: id, fullName, motto }) => {
 
   const dispatch = useDispatch();
 
     //open confirm vote modal
-    const openCandidateModal = () => {
-        dispatch(uiActions.openVoteCandidateModal())
-        dispatch(voteActions.changeSelectedVoteCandidate(id));
+   const openCandidateModal = () => {
+  dispatch(uiActions.openVoteCandidateModal());
+  dispatch(voteActions.changeSelectedVoteCandidate(id));
+};
 
-    }
+    
 
   return (
     <article className="candidate">
