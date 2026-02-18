@@ -3,6 +3,9 @@ import { AiOutlineClose } from "react-icons/ai"
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { uiActions } from '../store/ui-slice'
+import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 
 const AddElectionModal = () => {
@@ -11,11 +14,33 @@ const AddElectionModal = () => {
     const [thumbnail, setThumbnail] = useState(null); 
 
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     //close add election modal
     const closeModal = () => {
         dispatch(uiActions.closeElectionModal())
    }
+
+   const token = useSelector(state => state?.vote?.currentVoter?.token)
+
+
+   const createElection = async (e) => {
+    e.preventDefault()
+    try {
+        const electionData = new FormData()
+        electionData.set('title', title)
+        electionData.set('description', description)
+        electionData.set('thumbnail', thumbnail)
+
+        const responset = await axios.post(`${process.env.REACT_APP_API_URL}/elections`, electionData, 
+            {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
+        closeModal()
+        navigate(0)
+        
+    } catch (error) {
+        console.log(error)
+    }
+}
    
   return (
     <section className="modal">
@@ -26,7 +51,7 @@ const AddElectionModal = () => {
                     <AiOutlineClose />
                 </button>
             </header>
-            <form >
+            <form onSubmit ={createElection}>
                 <div>
                     <h6>Titulli i zgjedhjve: </h6>
                     <input type="text" value={title} onChange= {e => setTitle(e.target.value)}  name ='title' />
