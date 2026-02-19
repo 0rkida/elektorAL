@@ -7,6 +7,8 @@ import { uiActions } from '../store/ui-slice'
 import AddCandidateModal from '../components/AddCandidateModal'
 import axios from 'axios'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { voteActions } from '../store/vote-slice'
 
 
 const ElectionsDetails = () => {
@@ -15,9 +17,12 @@ const ElectionsDetails = () => {
   const [candidates, setCandidates] = useState([])
   const [voters, setVoters] = useState([])
 
+  const navigate = useNavigate()
+
   const {id} = useParams()
   const dispatch = useDispatch()
   const token = useSelector(state => state.vote.currentVoter?.token)
+  const isAdmin = useSelector(state => state.vote.currentVoter?.isAdmin === true) 
 
   const addCandidateModalShowing = useSelector(state => state.ui.addCandidateModalShowing)
   
@@ -55,6 +60,18 @@ const ElectionsDetails = () => {
     }
   }
 
+  const deleteElection = async () => {
+    try {
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/elections/${id}`,
+        {withCredentials: true , headers: {Authorization: `Bearer ${token}`}}
+      )
+      navigate('/elections')
+      
+    } catch (error) {
+      console.log(error)
+      
+    }
+  }
 
   useEffect(() => {
     getElection()
@@ -64,6 +81,7 @@ const ElectionsDetails = () => {
 
   const openModal = () => {
     dispatch(uiActions.openAddCandidateModal())
+    dispatch(voteActions.changeAddCandidateElectionId(id))
   }
 
 return (
@@ -94,9 +112,9 @@ return (
 ))}
 
 
-          <button className="add__candidate-btn" onClick={openModal}>
+          {isAdmin && <button className="add__candidate-btn" onClick={openModal}>
             <IoAddOutline />
-          </button>
+          </button> }
         </menu>
 
         <menu className="voters">
@@ -120,6 +138,7 @@ return (
             </tbody>
           </table>
         </menu>
+        {isAdmin && <button className='btn danger full' onClick={deleteElection}>Fshij zgjedhjen</button>}
 
       </div>
     </section>

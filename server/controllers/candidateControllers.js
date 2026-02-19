@@ -13,6 +13,8 @@ const CandidateModel = require("../models/candidateModel");
 // PROTECTED (ADMIN)
 const addCandidate = async (req, res, next) => {
   try {
+    console.log("ADD CANDIDATE BODY:", req.body);
+    console.log("ADD CANDIDATE FILES:", req.files);
     // admin check
     if (!req.user || !req.user.isAdmin) {
       return next(new HttpError("Vetëm administratori mund ta kryejë këtë veprim.", 403));
@@ -188,7 +190,7 @@ const voteCandidate = async (req, res, next) => {
             return next(new HttpError("Zgjedhja nuk u gjet.", 404));
         }
 
-        // ❌ MOS LEJO VOTIM TË DYFISHTË
+        
         if (voter.votedElections.includes(election._id)) {
             await sess.abortTransaction();
             sess.endSession();
