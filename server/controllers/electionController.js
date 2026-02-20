@@ -100,7 +100,10 @@ const getElection = async (req, res, next) => {
 const getCandidatesOfElection = async (req, res, next) => {
     try {
         const {id} = req.params;
-        const candidates = await CandidateModel.find({election: id})
+        const candidates = await CandidateModel
+  .find({ election: id })
+  .populate("municipality", "name");
+
         res.status(200).json(candidates)
     } catch (error) {
         return next(new HttpError(error))

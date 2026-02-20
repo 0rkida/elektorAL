@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import axios from "axios";
 import { IoMoonOutline, IoSunnyOutline } from "react-icons/io5";
 import { HiOutlineBars3 } from "react-icons/hi2";
 import { AiOutlineClose } from "react-icons/ai";
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const location = useLocation();
@@ -12,6 +13,7 @@ const Navbar = () => {
   const [darkTheme, setDarkTheme] = useState(
     localStorage.getItem('elektoral-theme') === 'dark'
   );
+  const token = useSelector(state => state.vote.currentVoter?.token)  
 
   // Dropdown visibility
   const hideDropdown = location.pathname === "/login" || 
@@ -104,8 +106,8 @@ const Navbar = () => {
             </div>
           )}
 
-          {showNav && (
-            <menu>
+          {token && showNav && (
+           <menu>
               <NavLink to="/elections" onClick={closeNavMenu}>Zgjedhje</NavLink>
               <NavLink to="/results" onClick={closeNavMenu}>Rezultate</NavLink>
               <NavLink to="/logout" onClick={closeNavMenu}>Log out</NavLink>

@@ -104,11 +104,15 @@ return (
         <menu className="electionDetails__candidates">
           {candidates.map(c => (
   <ElectionCandidate
-    key={c._id}
-    name={c.fullName}
-    image={c.image}   
-    motto={c.motto}
-  />
+  key={c._id}
+  _id={c._id}
+  fullName={c.fullName}
+  image={c.image}
+  motto={c.motto}
+  party={c.party}
+  municipality={c.municipality}
+/>
+
 ))}
 
 

@@ -6,15 +6,27 @@ import Candidate from '../components/Candidate'
 import ConfirmVote from '../components/ConfirmVote'
 import { useState, useEffect } from 'react'
 import axios from 'axios' 
+import { useNavigate } from 'react-router-dom'
 
 const Candidates = () => {
+
+  const navigate = useNavigate() 
+
+  //Access control
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/")
+    }},[])
+
 
   const {id: selectedElection} = useParams()
   const [candidates, setCandidates] = useState([])
   const [canVote, setCanVote] = useState(true)
+  const token = useSelector(state => state?.vote?.currentVoter?.token)
 
   const voteCandidateModalShowing = useSelector (state => state.ui.voteCandidateModalShowing)
-  const token = useSelector(state => state?.vote?.currentVoter?.token)
+ 
 
   const voterId = useSelector(state => state?.vote?.currentVoter?.id)
   const votedElections = useSelector(state => state?.vote?.currentVoter?.votedElections)

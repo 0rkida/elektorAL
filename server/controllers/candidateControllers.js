@@ -13,17 +13,16 @@ const CandidateModel = require("../models/candidateModel");
 // PROTECTED (ADMIN)
 const addCandidate = async (req, res, next) => {
   try {
-    console.log("ADD CANDIDATE BODY:", req.body);
-    console.log("ADD CANDIDATE FILES:", req.files);
+    
     // admin check
     if (!req.user || !req.user.isAdmin) {
       return next(new HttpError("Vetëm administratori mund ta kryejë këtë veprim.", 403));
     }
 
-    const { fullName, motto, currentElection, municipality } = req.body;
+    const { fullName, motto, party, currentElection, municipality } = req.body;
 
     // required fields check
-    if (!fullName || !motto || !currentElection || !municipality) {
+    if (!fullName || !motto || !party || !currentElection || !municipality) {
       return next(new HttpError("Mbushni të gjitha fushat.", 422));
     }
 
@@ -72,6 +71,7 @@ const addCandidate = async (req, res, next) => {
         const newCandidate = await CandidateModel.create([{
           fullName,
           motto,
+          party,
           municipality,
           image: result.secure_url,
           election: currentElection
