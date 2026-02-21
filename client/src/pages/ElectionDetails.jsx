@@ -12,6 +12,14 @@ import { voteActions } from '../store/vote-slice'
 
 
 const ElectionsDetails = () => {
+  
+     //Access control
+    
+      useEffect(() => {
+        if (!token) {
+          navigate("/")
+        }},[])
+        
   const [isLoading, setIsLoading] = useState(false)
   const [election, setElection] = useState({})
   const [candidates, setCandidates] = useState([])

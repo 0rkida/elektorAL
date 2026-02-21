@@ -3,11 +3,22 @@ import React, { useEffect, useState } from 'react'
 import ResultElection from '../components/ResultElection'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 
 const Results = () => {
   const [elections, setElections] = useState([])
   const token = useSelector(state => state?.vote?.currentVoter?.token);
+
+  const navigate = useNavigate()
+
+
+   //Access control
+  
+    useEffect(() => {
+      if (!token) {
+        navigate("/")
+      }},[])
 
   const getElections = async () => {
     try {

@@ -1,9 +1,24 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
 import { FaCheckCircle } from "react-icons/fa";
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Congrats = () => {
+  const token = useSelector(state => state?.vote?.currentVoter?.token)
+  const navigate = useNavigate()
+
+
+   //Access control
+  
+    useEffect(() => {
+      if (!token) {
+        navigate("/")
+      }},[])
+  
   return (
+  
     <section className="congrats">
       <div className="container congrats__container">
         <FaCheckCircle className="congrats__icon" />

@@ -8,10 +8,21 @@ import { useSelector } from 'react-redux'
 import UpdateElectionModal from '../components/UpdateElectionModal'
 import axios from 'axios'
 import Loader from '../components/Loader'
+import { useNavigate } from 'react-router-dom'
 
 
 
 const Elections = () => {
+ 
+  const navigate = useNavigate()
+
+
+   //Access control
+  
+    useEffect(() => {
+      if (!token) {
+        navigate("/")
+      }},[])
 
   const [isLoading, setIsLoading] = useState(false)
   const [elections, setElections] = useState([])
