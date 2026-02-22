@@ -1023,6 +1023,7 @@ body.dark .btn--secondary:hover {
   position: relative; /* ose absolute, në varësi të layout */
     left: -10px;
   margin-left: 10px;
+  color: var(--color-gray-900);
 }
 
 .dropdown-wrapper label {
@@ -1036,7 +1037,7 @@ body.dark .btn--secondary:hover {
   padding: 6px 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  background: white;
+  background: rgb(1, 70, 71);
   cursor: pointer;
 }
 

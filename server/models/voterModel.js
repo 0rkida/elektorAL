@@ -8,8 +8,16 @@ const voterSchema = new Schema(
     password: { type: String, required: true },
     votedElections: [{ type: Schema.Types.ObjectId, ref: "Election" }],
     isAdmin: { type: Boolean, default: false },
-    county: { type: String, required: true },
-    municipality: { type: String, required: true }
+    county: {
+    type: Schema.Types.ObjectId,
+    ref: "County",
+    required: true
+  },
+  municipality: {
+    type: Schema.Types.ObjectId,
+    ref: "Municipality",
+    required: true
+  }
   },
   { timestamps: true }
 );

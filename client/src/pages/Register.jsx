@@ -5,6 +5,7 @@ import { uiActions } from '../store/ui-slice';
 import ScanIDModal from '../components/ScanIDmodal';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 
 
@@ -27,6 +28,9 @@ const Register = () => {
     municipality: ""
   });
 
+  const [counties, setCounties] = useState([]);
+const [municipalities, setMunicipalities] = useState([]);
+
   // Funksioni që thirret nga modal-i pas OCR
   const handleScanID = (data) => {
     setUserData(prevState => ({
@@ -35,8 +39,8 @@ const Register = () => {
       mbiemri: data.surname || "",
       idPersonal: data.personalID || "",
       datelindja: data.dob || "",
-      county: data.qarku || "",
-      municipality: data.bashkia || ""
+      county: "",
+      municipality: ""
     }));
   };
 
@@ -77,6 +81,26 @@ const Register = () => {
       setError(err.response.data.message || err.message);
     }
   };
+
+  useEffect(() => {
+  axios.get(`${process.env.REACT_APP_API_URL}/counties`)
+    .then(res => setCounties(res.data))
+    .catch(console.error);
+}, []);
+
+useEffect(() => {
+  if (!userData.county) {
+    setMunicipalities([]);
+    return;
+  }
+
+  axios.get(
+    `${process.env.REACT_APP_API_URL}/municipalities/by-county/${userData.county}`
+  )
+    .then(res => setMunicipalities(res.data))
+    .catch(console.error);
+
+}, [userData.county]);
 
 
   return (
@@ -119,9 +143,46 @@ const Register = () => {
 
           {/* County & Municipality */}
           <div className="form__row">
-            <input type="text" name="county" placeholder="Qarku" value={userData.county} onChange={changeInputHandler} />
-            <input type="text" name="municipality" placeholder="Bashkia" value={userData.municipality} onChange={changeInputHandler} />
-          </div>
+  <label>
+    Qarku
+    <select
+      value={userData.county}
+      onChange={(e) =>
+        setUserData(prev => ({
+          ...prev,
+          county: e.target.value,
+          municipality: ""
+        }))
+      }
+      required
+    >
+      <option value="">Zgjidh qarkun</option>
+      {counties.map(c => (
+        <option key={c._id} value={c._id}>{c.name}</option>
+      ))}
+    </select>
+  </label>
+
+  <label>
+    Bashkia
+    <select
+      value={userData.municipality}
+      disabled={!userData.county}
+      onChange={(e) =>
+        setUserData(prev => ({
+          ...prev,
+          municipality: e.target.value
+        }))
+      }
+      required
+    >
+      <option value="">Zgjidh bashkinë</option>
+      {municipalities.map(m => (
+        <option key={m._id} value={m._id}>{m.name}</option>
+      ))}
+    </select>
+  </label>
+</div>
 
           {/* Email */}
           <input

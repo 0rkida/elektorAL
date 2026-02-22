@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-VoterModel = require('../models/voterModel')
+const Voter = require('../models/voterModel')
 const HttpError = require('../models/ErrorModel')
 
 // ============= REGISTER NEW VOTER
@@ -29,7 +29,7 @@ const registerVoter = async (req, res, next) => {
 
         const newEmail = email.toLowerCase();
 
-        const emailExists = await VoterModel.findOne({ email: newEmail });
+        const emailExists = await Voter.findOne({ email: newEmail });
         if (emailExists) {
             return next(new HttpError("Ky email është i regjistruar!", 422));
         }
@@ -40,7 +40,7 @@ const registerVoter = async (req, res, next) => {
         let isAdmin = newEmail === "orkida@gmail.com";
 
         // SAVE në DB
-        const newVoter = await VoterModel.create({
+        const newVoter = await Voter.create({
             fullName,
             idNumber: idPersonal,
             email: newEmail,
@@ -68,51 +68,73 @@ const generateToken = (payload) => {
 // ============= LOGIN VOTER
 //POST : api/voters/login
 const loginVoter = async (req, res, next) => {
-    try {
-        const {email, password} = req.body;
-        if (!email || !password ){
-            return next(new HttpError("Mbushni te gjitha fushat." , 422))
-        }
+  try {
+    const { email, password } = req.body;
 
-        const newEmail = email.toLowerCase();
-        const voter = await VoterModel.findOne({email: newEmail});
+    if (!email || !password) {
+      return next(new HttpError("Mbushni te gjitha fushat.", 422));
+    }
 
-        if(!voter) {
-            return next(new HttpError("Kredenciale te pasakta!", 422));
-        }
+    const voter = await Voter.findOne({ email: email.toLowerCase() })
+      .populate("county", "name")
+      .populate("municipality", "name");
 
-        // compare passwords
-        const comparePass = await bcrypt.compare(password, voter.password);
-        if(!comparePass) {
-            return next(new HttpError("Kredenciale te pasakta!", 422));
-        }
+    if (!voter) {
+      return next(new HttpError("Kredenciale te pasakta!", 422));
+    }
 
-        const {_id: id, isAdmin, votedElections} = voter;
-        const token = generateToken({id, isAdmin});
+    const comparePass = await bcrypt.compare(password, voter.password);
+    if (!comparePass) {
+      return next(new HttpError("Kredenciale te pasakta!", 422));
+    }
 
-        res.json({token, id, votedElections, isAdmin});
-         
-    } catch (error) {
-        console.error(error); // shih gabimin real
-        return next(new HttpError("Hyrja ne aplikacion deshtoi. Kontrolloni kredencialet ose provoni me vone." , 500))
-    } 
-}
+    const token = generateToken({
+      id: voter._id,
+      isAdmin: voter.isAdmin
+    });
 
+    // ✅ KTHEJE USER-IN TË PLOTË
+    res.status(200).json({
+      id: voter._id,
+      token,
+      isAdmin: voter.isAdmin,
+      votedElections: voter.votedElections,
+      county: voter.county,
+      municipality: voter.municipality
+    });
+
+  } catch (error) {
+    console.error(error);
+    return next(
+      new HttpError(
+        "Hyrja ne aplikacion deshtoi. Provoni me vone.",
+        500
+      )
+    );
+  }
+};
 
 // ============= GET VOTER
 //GET : api/voters/:ID
 //PROTECTED
 
 const getVoter = async (req, res, next) => {
-    const {id} = req.params;
-    try {
-        const {id} = req.params;
-        const voter = await VoterModel.findById(id).select("-password").populate('county', 'name')
-    .populate('municipality', 'name')
-        res.json(voter)
-    } catch (error) {
-        return next(HttpError("Votuesi nuk u gjend", 404))
+  try {
+    const { id } = req.params;
+
+    const voter = await Voter.findById(id)
+      .select("-password")
+      .populate("county", "name")
+      .populate("municipality", "name");
+
+    if (!voter) {
+      return next(new HttpError("Votuesi nuk u gjend", 404));
     }
-}
+
+    res.status(200).json(voter);
+  } catch (error) {
+    return next(new HttpError("Votuesi nuk u gjend", 404));
+  }
+};
 
 module.exports = {registerVoter, loginVoter, getVoter}

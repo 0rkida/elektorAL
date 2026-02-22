@@ -5,8 +5,7 @@ const {addElection,getElection, getElections, updateElection, removeElection,
     getCandidatesOfElection, getElectionVoters} = require("../controllers/electionController") 
 const {addCandidate, getCandidate,removeCandidate, voteCandidate } = require("../controllers/candidateControllers")
 const { getAllCounties, createCounty } = require("../controllers/countyController")
-const { getAllMunicipalities, createMunicipality } = require("../controllers/municipalityController")
-
+const { getAllMunicipalities, createMunicipality, getMunicipalitiesByCounty } = require("../controllers/municipalityController")
 
 
 const authMiddleware = require('../middleware/authMiddleware')
@@ -36,6 +35,8 @@ router.post('/counties', authMiddleware, createCounty);
 
 router.get('/municipalities', getAllMunicipalities);
 router.post('/municipalities', authMiddleware, createMunicipality);
+
+router.get('/municipalities/by-county/:countyId', getMunicipalitiesByCounty);
 
 
 

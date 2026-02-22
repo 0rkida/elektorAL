@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 const ElectionModel = require("../models/electionModel");
 const CandidateModel = require("../models/candidateModel");
+const VoterModel = require("../models/voterModel");
 
 // ================= ADD CANDIDATE
 // POST : /api/candidates
@@ -149,76 +150,70 @@ const removeCandidate = async (req, res, next) => {
 //PATCH : api/candidates/:id
 //PROTECTED 
 const voteCandidate = async (req, res, next) => {
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
+  const sess = await mongoose.startSession();
+  sess.startTransaction();
 
-    try {
-        const { id: candidateId } = req.params;
-        const { selectedElection } = req.body;
+  try {
+    const { id: candidateId } = req.params;
 
-        if (!selectedElection) {
-            return next(new HttpError("Zgjedhja nuk është specifikuar.", 422));
-        }
+    // 1. gjej kandidatin
+    const candidate = await CandidateModel
+      .findById(candidateId)
+      .session(sess);
 
-        const candidate = await CandidateModel
-            .findById(candidateId)
-            .session(sess);
-
-        if (!candidate) {
-            await sess.abortTransaction();
-            sess.endSession();
-            return next(new HttpError("Kandidati nuk u gjet.", 404));
-        }
-
-        const voter = await VoterModel
-            .findById(req.user.id)
-            .session(sess);
-
-        if (!voter) {
-            await sess.abortTransaction();
-            sess.endSession();
-            return next(new HttpError("Votuesi nuk u gjet.", 404));
-        }
-
-        const election = await ElectionModel
-            .findById(selectedElection)
-            .session(sess);
-
-        if (!election) {
-            await sess.abortTransaction();
-            sess.endSession();
-            return next(new HttpError("Zgjedhja nuk u gjet.", 404));
-        }
-
-        
-        if (voter.votedElections.includes(election._id)) {
-            await sess.abortTransaction();
-            sess.endSession();
-            return next(
-                new HttpError("Ju keni votuar tashmë në këtë zgjedhje.", 403)
-            );
-        }
-
-        // update everything
-        candidate.voteCount += 1;
-        election.voters.push(voter._id);
-        voter.votedElections.push(election._id);
-
-        await candidate.save({ session: sess });
-        await election.save({ session: sess });
-        await voter.save({ session: sess, validateBeforeSave: false });
-
-        await sess.commitTransaction();
-        sess.endSession();
-
-        return res.status(200).json(voter.votedElections);
-
-    } catch (error) {
-        await sess.abortTransaction();
-        sess.endSession();
-        console.error(error);
-        return next(new HttpError("Votimi dështoi.", 500));
+    if (!candidate) {
+      await sess.abortTransaction();
+      sess.endSession();
+      return next(new HttpError("Kandidati nuk u gjet.", 404));
     }
+
+    // 2. gjej voterin (nga authMiddleware)
+    const voter = await VoterModel
+      .findById(req.user._id)
+      .session(sess);
+
+    if (!voter) {
+      await sess.abortTransaction();
+      sess.endSession();
+      return next(new HttpError("Votuesi nuk u gjet.", 404));
+    }
+
+    const electionId = candidate.election;
+
+    // 3. kontroll nese ka votuar
+    if (
+      voter.votedElections
+        .map(e => e.toString())
+        .includes(electionId.toString())
+    ) {
+      await sess.abortTransaction();
+      sess.endSession();
+      return next(
+        new HttpError("Ju keni votuar tashmë në këtë zgjedhje.", 403)
+      );
+    }
+
+    // 4. update
+    candidate.voteCount += 1;
+    voter.votedElections.push(electionId);
+
+    await candidate.save({ session: sess });
+    await voter.save({ session: sess });
+
+    await sess.commitTransaction();
+    sess.endSession();
+
+    return res.status(200).json({
+      message: "Vota u regjistrua me sukses",
+      election: electionId
+    });
+
+  } catch (error) {
+    await sess.abortTransaction();
+    sess.endSession();
+    console.error("VOTE ERROR 👉", error);
+    return next(new HttpError("Votimi dështoi.", 500));
+  }
 };
 
 

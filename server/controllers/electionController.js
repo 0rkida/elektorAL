@@ -68,18 +68,19 @@ const addElection = async (req, res, next) => {
 // ============= GET ALL ELECTIONS
 //GET : api/elections/
 //PROTECTED 
+const MunicipalityModel = require("../models/municipalityModel");
+
 const getElections = async (req, res, next) => {
-    try {
-        const elections = await ElectionModel.find();
-        res.status(200).json(elections)
-        
-    } catch (error) {
-    
-        return next(new HttpError(error))
-        
-    }
-   
-}
+  try {
+    const elections = await ElectionModel.find();
+    res.status(200).json(elections);
+  } catch (error) {
+    console.error("GET ELECTIONS ERROR 👉", error);
+    return next(
+      new HttpError("Nuk mund te merren zgjedhjet.", 500)
+    );
+  }
+};
 // ============= GET SINGLE ELECTIONS
 //GET : api/elections/:id
 //PROTECTED
@@ -97,20 +98,41 @@ const getElection = async (req, res, next) => {
 // ============= GET ELECTION CANDIDATES
 //GET : api/elections/id/candidates
 //PROTECTED
+
 const getCandidatesOfElection = async (req, res, next) => {
-    try {
-        const {id} = req.params;
-        const candidates = await CandidateModel
-  .find({ election: id })
-  .populate("municipality", "name");
+  try {
+    const { id } = req.params;
+    let filter = { election: id };
 
-        res.status(200).json(candidates)
-    } catch (error) {
-        return next(new HttpError(error))
-        
+    // ===== VOTER =====
+    if (!req.user.isAdmin) {
+      filter.municipality =
+        req.user.municipality._id || req.user.municipality;
     }
-}
 
+    // ===== ADMIN =====
+    if (req.user.isAdmin) {
+      const { municipality, county } = req.query;
+
+      if (municipality) {
+        filter.municipality = municipality;
+      } else if (county) {
+        const munis = await MunicipalityModel.find({ county }).select("_id");
+        filter.municipality = { $in: munis.map(m => m._id) };
+      }
+    }
+
+    const candidates = await CandidateModel.find(filter)
+      .populate("municipality", "name");
+
+    res.status(200).json(candidates);
+  } catch (err) {
+    console.error("GET CANDIDATES ERROR 👉", err);
+    return next(
+      new HttpError("Nuk mund te merren kandidatet.", 500)
+    );
+  }
+};
 // ============= GET ELECTION VOTERS
 //GET : api/elections/:id/voters
 //PROTECTED
