@@ -6,6 +6,7 @@ import ScanIDModal from '../components/ScanIDmodal';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 
 
 
@@ -51,6 +52,29 @@ const [municipalities, setMunicipalities] = useState([]);
     }));
   };
 
+  const generateVoterPDF = (data, countyName, municipalityName) => {
+    const doc = new jsPDF();
+    const yStart = 15;
+    const lineHeight = 7;
+
+    doc.setFontSize(11);
+    doc.text("Dëshmi e Regjistrimit të Votuesit", 105, yStart, { align: "center" });
+    doc.setFontSize(9);
+    doc.setFont(undefined, "normal");
+
+    let y = yStart + 10;
+    doc.text(`Emer Mbiemer: ${data.emri || ""} ${data.mbiemri || ""}`, 15, y); y += lineHeight;
+    doc.text(`Ditelindje: ${data.datelindja || "-"}`, 15, y); y += lineHeight;
+    doc.text(`Nr Personal: ${data.idPersonal || "-"}`, 15, y); y += lineHeight;
+    doc.text(`Ka votuar: Jo`, 15, y); y += lineHeight;
+    doc.text(`Bashkia: ${municipalityName || "-"}`, 15, y); y += lineHeight;
+    doc.text(`Qarku: ${countyName || "-"}`, 15, y); y += lineHeight;
+    doc.text(`Data e regjistrimit: ${new Date().toLocaleDateString("sq-AL")}`, 15, y);
+
+    doc.autoPrint();
+    window.open(doc.output("bloburl"), "_blank");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -60,12 +84,14 @@ const [municipalities, setMunicipalities] = useState([]);
     }
 
     try {
-      
-      await axios.post (`${process.env.REACT_APP_API_URL}/voters/register`, userData)
-      navigate('/');
-      
+      await axios.post(`${process.env.REACT_APP_API_URL}/voters/register`, userData);
 
-            alert("Regjistrimi u krye me sukses!");
+      const countyName = counties.find((c) => c._id === userData.county)?.name || "";
+      const municipalityName = municipalities.find((m) => m._id === userData.municipality)?.name || "";
+      generateVoterPDF(userData, countyName, municipalityName);
+
+      alert("Regjistrimi u krye me sukses!");
+      navigate("/elections/:id/candidates");
       setUserData({
         emri: "",
         mbiemri: "",
@@ -223,11 +249,12 @@ useEffect(() => {
             <label htmlFor="terms"> Pajtohem me Termat dhe Kushtet </label>
           </div>
 
+          
           <p>
-            E keni krijuar llogarinë tuaj? <Link to="/login">Logohu në elektorAL</Link>
+            Jeni nje administrator? <Link to="/login">Administro</Link>
           </p>
 
-          <button type="submit" className="btn primary">Regjistrohu</button>
+          <button type="submit" className="btn primary">Regjistro</button>
         </form>
       </div>
     </section>

@@ -855,165 +855,233 @@ body.dark .election {
 .landing {
   display: flex;
   min-height: 100vh;
-  font-family: "Segoe UI", sans-serif;
-  color: #212121; /* tekst neutral i zi */
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+  color: var(--color-gray-700);
 }
 
-/* Kolona majtas */
+/* Left column - content */
 .landing__left {
   flex: 1;
-  padding: 4rem;
+  padding: 4rem 4.5rem 4rem 5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2rem;
-  background-color: #fafafa; /* bezhë e bardhë e ngrohtë */
+  gap: 2.5rem;
+  background-color: #fcfcfc;
+  max-width: 52rem;
+}
+
+.landing__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .landing__logo img {
-  width: 120px;
-  margin-bottom: 1rem;
+  width: 100px;
+  height: auto;
+  margin-bottom: 0.25rem;
 }
 
-.landing__left h1 {
-  font-size: 2.8rem;
-  color: #2e2e2e; /* grafit/gri e errët */
+.landing__title {
+  font-family: "Montserrat", sans-serif;
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--color-gray-800);
+  text-transform: none;
 }
 
-.landing__left p {
-  font-size: 1.2rem;
-  color: #37474f; /* gri e errët */
+.landing__tagline {
+  font-size: 1.05rem;
+  color: var(--color-gray-500);
+  line-height: 1.6;
+  max-width: 28rem;
 }
 
 .landing__buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
-.btn {
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
+.landing .btn {
+  padding: 0.75rem 1.75rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
   font-weight: 500;
   text-decoration: none;
-  transition: 0.3s;
+  transition: var(--transition);
 }
 
-.btn--primary {
-  background: #09504c; /* portokalli e butë */
+.landing .btn--primary {
+  background: var(--primary-color);
+  color: #fff;
+  border: 1px solid transparent;
+}
+
+.landing .btn--primary:hover {
+  background: var(--primary-variant);
   color: #fff;
 }
 
-.btn--primary:hover {
-  background: #009176;
-}
-
-.btn--secondary {
-  border: 2px solid #09504c;
-  color: #009176;
+.landing .btn--secondary {
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-gray-700);
   background: transparent;
 }
 
-.btn--secondary:hover {
-  background: #009176;
-  color: #fff;
+.landing .btn--secondary:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-400);
+  color: var(--color-gray-800);
 }
 
-.landing__info h2,
-.landing__about h2 {
-  margin-bottom: 0.5rem;
-  color: #2e2e2e;
+.landing__divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-gray-200) 20%,
+    var(--color-gray-200) 80%,
+    transparent
+  );
+  margin: 0.5rem 0;
+}
+
+.landing__card {
+  background: var(--color-gray-0);
+  padding: 1.75rem 2rem;
+  border-radius: var(--radius-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--color-gray-100);
+}
+
+.landing__card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  margin-bottom: 1rem;
+  text-transform: none;
 }
 
 .landing__features {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .landing__features li {
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  color: var(--color-gray-600);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Kolona djathtas */
+.landing__feature-icon {
+  font-size: 1rem;
+}
+
+.landing__about-text {
+  font-size: 0.95rem;
+  color: var(--color-gray-600);
+  line-height: 1.65;
+}
+
+.landing__footer {
+  font-size: 0.8rem;
+  color: var(--color-gray-400);
+  margin-top: 1rem;
+}
+
+/* Right column - image */
 .landing__right {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5; /* gri e hapur */
+  background: var(--color-gray-100);
+  min-height: 100vh;
 }
 
-.landing__right img {
-  max-width: 80%;
+.landing__image-wrapper {
+  width: 100%;
+  max-width: 36rem;
+  padding: 3rem;
+}
+
+.landing__image-wrapper img {
+  width: 100%;
   height: auto;
+  border-radius: var(--radius-2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
-/* Footer */
-.landing__footer {
-  font-size: 0.9rem;
-  color: #555;
-  margin-top: 2rem;
-}
-
-/* 📱 Responsive */
+/* Responsive */
 @media (max-width: 900px) {
   .landing {
     flex-direction: column;
   }
 
+  .landing__left {
+    padding: 3rem 2rem;
+    max-width: none;
+  }
+
   .landing__right {
-    display: none; /* fsheh ilustrimin ne mobile */
+    display: none;
   }
 }
 
-
-
-/* =======================
-   DARK MODE - LandingPage nga Navbar
-   ======================= */
-body.dark .landing {
-  background-color: #121212;
-  color: #e0e0e0;
-}
-
+/* Dark mode - Landing */
 body.dark .landing__left {
-  background-color: #1e1e1e;
+  background-color: var(--color-gray-100);
 }
 
 body.dark .landing__right {
-  background-color: #2e2e2e;
+  background-color: var(--color-gray-200);
 }
 
-body.dark .landing__left h1,
-body.dark .landing__info h2,
-body.dark .landing__about h2 {
-  color: #f5f5f5;
+body.dark .landing__title {
+  color: var(--color-gray-800);
 }
 
-body.dark .landing__left p,
+body.dark .landing__tagline {
+  color: var(--color-gray-500);
+}
+
+body.dark .landing__card {
+  background: var(--color-gray-0);
+  border-color: var(--color-gray-200);
+}
+
+body.dark .landing__card-title {
+  color: var(--color-gray-800);
+}
+
 body.dark .landing__features li,
+body.dark .landing__about-text {
+  color: var(--color-gray-600);
+}
+
 body.dark .landing__footer {
-  color: #cfcfcf;
+  color: var(--color-gray-500);
 }
 
-body.dark .btn--primary {
-  background: #009176;
+body.dark .landing .btn--secondary {
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-700);
 }
 
-body.dark .btn--primary:hover {
-  background: #00b68c;
-}
-
-body.dark .btn--secondary {
-  border: 2px solid #009176;
-  color: #00b68c;
-}
-
-body.dark .btn--secondary:hover {
-  background: #009176;
-  color: #fff;
+body.dark .landing .btn--secondary:hover {
+  background: var(--color-gray-200);
+  border-color: var(--color-gray-400);
+  color: var(--color-gray-800);
 }
 
 

@@ -4,14 +4,22 @@ const Voter = require("../models/voterModel");
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const authorization =
-      req.headers.authorization || req.headers.Authorization;
+    let token;
 
-    if (!authorization || !authorization.startsWith("Bearer ")) {
-      return next(new HttpError("I paautorizuar. S'ka token.", 403));
+    // 1️⃣ Provo nga cookie (MË E SIGURTA)
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
 
-    const token = authorization.split(" ")[1];
+    // 2️⃣ Fallback nga Authorization header
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return next(new HttpError("I paautorizuar. Nuk ka token.", 401));
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const voter = await Voter.findById(decoded.id)
@@ -23,11 +31,11 @@ const authMiddleware = async (req, res, next) => {
       return next(new HttpError("User nuk u gjet.", 404));
     }
 
-    req.user = voter; 
+    req.user = voter;
     next();
   } catch (err) {
     console.error("AUTH ERROR 👉", err);
-    return next(new HttpError("Autentikimi deshtoi.", 403));
+    return next(new HttpError("Autentikimi deshtoi.", 401));
   }
 };
 

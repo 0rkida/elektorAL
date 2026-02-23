@@ -3,6 +3,7 @@ const cors = require("cors")
 const {connect} = require("mongoose")
 require("dotenv").config()
 const upload = require("express-fileupload")
+const cookieParser = require("cookie-parser")
 
 const Routes = require("./routes/Routes")
 const {notFound, errorHandler} = require("./middleware/errorMiddleware")
@@ -10,13 +11,15 @@ const {notFound, errorHandler} = require("./middleware/errorMiddleware")
 const app = express()
 app.use(express.json({extended: true}))
 app.use(express.urlencoded({extended: true}))
-app.use(cors({credentials: true, origin: ["http://localhost:3000"]}))
+app.use(cors({ origin: ["http://localhost:3000"], credentials: true }))
 app.use(upload())
 
 app.use('/api', Routes)
 
 app.use(notFound)
 app.use(errorHandler)
+
+app.use(cookieParser())
 
 
 

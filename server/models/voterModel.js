@@ -13,6 +13,11 @@ const voterSchema = new Schema(
     ref: "County",
     required: true
   },
+    dateOfBirth: {
+    type: Date,
+    required: true
+  },
+  
   municipality: {
     type: Schema.Types.ObjectId,
     ref: "Municipality",

@@ -10,8 +10,7 @@ import Candidates from './pages/Candidates';
 import Congrats from './pages/Congrats';
 import Logout from './pages/Logout';
 import Landing from './pages/Landing';
-
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -36,33 +35,34 @@ const router = createBrowserRouter([
       },
 
       {
-        path: 'results', 
-        element: <Results  />
-      },
-
-      {
-        path: 'elections', 
-        element: <Elections  />
-      },
-
-      {
-        path: 'elections/:id', 
-        element: <ElectionDetails />
-      },
-
-      {
-        path: 'elections/:id/candidates', 
-        element: <Candidates />
-      },
-
-      {
-        path: 'congrats', 
-        element: <Congrats />
-      },
-
-      {
         path: "logout", 
         element: <Logout />
+      },
+
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: 'results', 
+            element: <Results  />
+          },
+          {
+            path: 'elections', 
+            element: <Elections  />
+          },
+          {
+            path: 'elections/:id', 
+            element: <ElectionDetails />
+          },
+          {
+            path: 'elections/:id/candidates', 
+            element: <Candidates />
+          },
+          {
+            path: 'congrats', 
+            element: <Congrats />
+          }
+        ]
       },
 
 

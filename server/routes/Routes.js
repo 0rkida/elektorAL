@@ -15,6 +15,15 @@ const router = Router()
 router.post('/voters/register' , registerVoter);
 router.post('/voters/login' , loginVoter);
 router.get('/voters/:id' ,authMiddleware, getVoter);
+router.post('/logout', (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production"
+  });
+
+  return res.status(200).json({ message: "Logged out successfully" });
+});
 
 router.post('/elections', authMiddleware, addElection)
 router.get('/elections',authMiddleware, getElections)

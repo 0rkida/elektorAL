@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { voteActions } from '../store/vote-slice';
 
 const Login = () => {
+  
   const [credentials, setCredentials] = useState({
     email: "",
     password: ""
@@ -25,13 +26,22 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/voters/login`,
-        credentials
-      );
+  `${process.env.REACT_APP_API_URL}/voters/login`,
+  {
+    email: credentials.email,
+    password: credentials.password
+  },
+  {
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }
+);
 
       const newVoter = response.data;
 
-      localStorage.setItem("currentUser", JSON.stringify(newVoter));
+      localStorage.setItem("currentVoter", JSON.stringify(newVoter));
       dispatch(voteActions.changeCurrentVoter(newVoter));
       navigate("/results");
 
@@ -66,12 +76,8 @@ const Login = () => {
             onChange={changeInputHandler}
           />
 
-          <p className="form__forgot">
-            <Link to="/forgot-password">Keni harruar fjalëkalimin?</Link>
-          </p>
-
           <p>
-            Nuk keni llogari? <Link to="/register">Regjistrohuni</Link>
+            Voues i ri? <Link to="/register">Regjistroje</Link>
           </p>
 
           <button type="submit" className="btn primary">Hyr</button>

@@ -8,16 +8,35 @@ const HttpError = require('../models/ErrorModel')
 //POST : api/voters/register
 const registerVoter = async (req, res, next) => {
     try {
-        const { emri, mbiemri, email, password, password2, idPersonal, county, municipality } = req.body;
+        const {
+  emri,
+  mbiemri,
+  email,
+  password,
+  password2,
+  idPersonal,
+  county,
+  municipality,
+  datelindja
+} = req.body;
+
+console.log("REQ BODY 👉", req.body);
 
         const fullName = `${emri?.trim() || ""} ${mbiemri?.trim() || ""}`.trim();
 
-        if (
-            !fullName || !email?.trim() || !password || !password2 ||
-            !idPersonal || !county || !municipality
-        ) {
-            return next(new HttpError("Mbushni te gjitha fushat", 422));
-        }
+       if (
+  !emri?.trim() ||
+  !mbiemri?.trim() ||
+  !email?.trim() ||
+  !password ||
+  !password2 ||
+  !idPersonal?.trim() ||
+  !county ||
+  !municipality ||
+  !datelindja
+) {
+  return next(new HttpError("Mbushni te gjitha fushat", 422));
+}
 
         if (password !== password2) {
             return next(new HttpError("Fjalekalimet nuk përputhen", 422));
@@ -34,21 +53,51 @@ const registerVoter = async (req, res, next) => {
             return next(new HttpError("Ky email është i regjistruar!", 422));
         }
 
+        const birthDate = new Date(datelindja);
+         const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  if (age < 18) {
+    return next(
+      new HttpError("Votuesi duhet te jete mbi 18 vjec.", 403)
+    );
+  }
+
+   let existingVoter;
+  try {
+    existingVoter = await Voter.findOne({ idNumber });
+  } catch (err) {
+    return next(new HttpError("Regjistrimi deshtoi.", 500));
+  }
+
+  if (existingVoter) {
+    return next(
+      new HttpError("Ky votues eshte regjistruar me pare.", 422)
+    );
+  }
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         let isAdmin = newEmail === "orkida@gmail.com";
 
         // SAVE në DB
-        const newVoter = await Voter.create({
-            fullName,
-            idNumber: idPersonal,
-            email: newEmail,
-            password: hashedPassword,
-            county,
-            municipality,
-            isAdmin
-        });
+       const newVoter = await Voter.create({
+  fullName,
+  idNumber: idPersonal,
+  email: newEmail,
+  password: hashedPassword,
+  county,
+  municipality,
+  dateOfBirth: datelindja,
+  isAdmin
+});
 
         res.status(201).json(`Votues i ri ${fullName} u krijua.`);
 
@@ -69,6 +118,7 @@ const generateToken = (payload) => {
 //POST : api/voters/login
 const loginVoter = async (req, res, next) => {
   try {
+    console.log("LOGIN BODY 👉", req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -88,20 +138,23 @@ const loginVoter = async (req, res, next) => {
       return next(new HttpError("Kredenciale te pasakta!", 422));
     }
 
-    const token = generateToken({
-      id: voter._id,
-      isAdmin: voter.isAdmin
-    });
 
-    // ✅ KTHEJE USER-IN TË PLOTË
-    res.status(200).json({
-      id: voter._id,
-      token,
-      isAdmin: voter.isAdmin,
-      votedElections: voter.votedElections,
-      county: voter.county,
-      municipality: voter.municipality
-    });
+    const token = generateToken({
+  id: voter._id,
+  isAdmin: voter.isAdmin
+});
+
+
+
+// ✅ kthe vetëm user data (pa token)
+return res.status(200).json({
+  id: voter._id,
+  token,
+  isAdmin: voter.isAdmin,
+  votedElections: voter.votedElections,
+  county: voter.county,
+  municipality: voter.municipality
+});
 
   } catch (error) {
     console.error(error);
