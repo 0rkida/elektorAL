@@ -3,9 +3,11 @@ const jwt = require('jsonwebtoken')
 
 const Voter = require('../models/voterModel')
 const HttpError = require('../models/ErrorModel')
+const auditLogger = require('../utils/auditLogger')
 
 // ============= REGISTER NEW VOTER
 //POST : api/voters/register
+
 const registerVoter = async (req, res, next) => {
     try {
         const {
@@ -71,7 +73,7 @@ console.log("REQ BODY 👉", req.body);
 
    let existingVoter;
   try {
-    existingVoter = await Voter.findOne({ idNumber });
+    existingVoter = await Voter.findOne({ idNumber : idPersonal});
   } catch (err) {
     return next(new HttpError("Regjistrimi deshtoi.", 500));
   }
@@ -118,7 +120,6 @@ const generateToken = (payload) => {
 //POST : api/voters/login
 const loginVoter = async (req, res, next) => {
   try {
-    console.log("LOGIN BODY 👉", req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -130,31 +131,50 @@ const loginVoter = async (req, res, next) => {
       .populate("municipality", "name");
 
     if (!voter) {
+      await auditLogger({
+        req,
+        action: "LOGIN_FAILURE",
+        resource: "voter:login",
+        metadata: { reason: "user_not_found", email: email.toLowerCase() },
+      });
       return next(new HttpError("Kredenciale te pasakta!", 422));
     }
 
     const comparePass = await bcrypt.compare(password, voter.password);
     if (!comparePass) {
+      await auditLogger({
+        req,
+        user: voter,
+        action: "LOGIN_FAILURE",
+        resource: "voter:login",
+        metadata: { reason: "bad_password", email: email.toLowerCase() },
+      });
       return next(new HttpError("Kredenciale te pasakta!", 422));
     }
 
-
     const token = generateToken({
-  id: voter._id,
-  isAdmin: voter.isAdmin
-});
+      id: voter._id,
+      isAdmin: voter.isAdmin
+    });
 
+    // ✅ audit log login success
+    await auditLogger({
+      req,
+      user: voter,
+      action: "LOGIN_SUCCESS",
+      resource: `voter:${voter._id.toString()}`,
+      metadata: { isAdmin: voter.isAdmin },
+    });
 
-
-// ✅ kthe vetëm user data (pa token)
-return res.status(200).json({
-  id: voter._id,
-  token,
-  isAdmin: voter.isAdmin,
-  votedElections: voter.votedElections,
-  county: voter.county,
-  municipality: voter.municipality
-});
+    // ✅ KTHEJE USER-IN TË PLOTË
+    res.status(200).json({
+      id: voter._id,
+      token,
+      isAdmin: voter.isAdmin,
+      votedElections: voter.votedElections,
+      county: voter.county,
+      municipality: voter.municipality
+    });
 
   } catch (error) {
     console.error(error);

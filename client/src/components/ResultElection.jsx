@@ -19,7 +19,7 @@ const ResultElection = ({ _id: id, thumbnail, title }) => {
   const municipality = useSelector(state => state.filters.municipality)
 
   useEffect(() => {
-    const fetchCandidates = async () => {
+    const fetchData = async () => {
       if (!token) return
 
       setIsLoading(true)
@@ -32,19 +32,42 @@ const ResultElection = ({ _id: id, thumbnail, title }) => {
         }
 
         const qs = params.toString()
-        const url =
+        const candidatesUrl =
           `${process.env.REACT_APP_API_URL}/elections/${id}/candidates` +
           (qs ? `?${qs}` : "")
+        const resultsUrl =
+          `${process.env.REACT_APP_API_URL}/elections/${id}/results`
 
-        const res = await axios.get(url, {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        const [candidatesRes, resultsRes] = await Promise.all([
+          axios.get(candidatesUrl, {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(resultsUrl, {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ])
 
-        setElectionCandidates(res.data)
+        const candidates = candidatesRes.data || []
+        const results = resultsRes.data || []
 
-        const total = res.data.reduce((sum, c) => sum + (c.voteCount || 0), 0)
+        const votesByCandidate = results.reduce((acc, curr) => {
+          if (curr && curr.candidateId) {
+            acc[String(curr.candidateId)] = curr.totalVotes || 0
+          }
+          return acc
+        }, {})
+
+        const total = results.reduce((sum, r) => sum + (r.totalVotes || 0), 0)
+
         setTotalVotes(total)
+        setElectionCandidates(
+          candidates.map(candidate => ({
+            ...candidate,
+            votes: votesByCandidate[String(candidate._id)] || 0
+          }))
+        )
       } catch (err) {
         console.log(err)
       } finally {
@@ -52,7 +75,7 @@ const ResultElection = ({ _id: id, thumbnail, title }) => {
       }
     }
 
-    fetchCandidates()
+    fetchData()
   }, [id, token, isAdmin, county, municipality])
 
   return (

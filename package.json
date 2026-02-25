@@ -1,7 +1,48 @@
 {
+  "name": "elektoral-desktop",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+  "dev:server": "nodemon server/index.js",
+  "dev:client": "npm start --prefix client",
+
+  "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+
+  "dev:electron": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+
+  "start": "electron .",
+
+  "build:react": "cd client && npm run build",
+  "build:desktop": "npm run build:react && electron-builder"
+},
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-fileupload": "^1.5.2",
+    "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
-    "tesseract.js": "^7.0.0"
+    "mongoose": "^9.2.1",
+    "tesseract.js": "^7.0.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "electron": "^40.6.0",
+    "electron-builder": "^26.8.1",
+    "wait-on": "^9.0.4"
+  },
+  "build": {
+    "appId": "com.kida.elektoral",
+    "productName": "ElektorAL",
+    "win": {
+      "target": "nsis"
+    },
+    "directories": {
+      "output": "dist"
+    }
   }
 }

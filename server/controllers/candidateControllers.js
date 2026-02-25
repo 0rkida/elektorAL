@@ -4,10 +4,13 @@ const cloudinary = require("../utils/cloudinary");
 const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
+const crypto = require("crypto");
+const auditLogger = require("../utils/auditLogger");
 
 const ElectionModel = require("../models/electionModel");
 const CandidateModel = require("../models/candidateModel");
 const VoterModel = require("../models/voterModel");
+const VoteModel = require("../models/voteModel");
 
 // ================= ADD CANDIDATE
 // POST : /api/candidates
@@ -193,20 +196,50 @@ const voteCandidate = async (req, res, next) => {
       );
     }
 
-    // 4. update
-    candidate.voteCount += 1;
-    voter.votedElections.push(electionId);
+    // 4. krijo vote anonime me hash chain per zgjedhje
+    const secret = process.env.VOTE_SECRET || "change-me-vote-secret";
+    const timestamp = new Date();
 
-    await candidate.save({ session: sess });
+    const lastVote = await VoteModel.findOne({ election: electionId })
+      .sort({ createdAt: -1 })
+      .session(sess);
+
+    const prevHash = lastVote ? lastVote.hash : "GENESIS";
+    const hashInput = `${prevHash}|${candidateId.toString()}|${electionId.toString()}|${timestamp.toISOString()}|${secret}`;
+    const hash = crypto.createHash("sha256").update(hashInput).digest("hex");
+
+    await VoteModel.create(
+      [
+        {
+          candidate: candidateId,
+          election: electionId,
+          prevHash,
+          hash,
+          createdAt: timestamp,
+        },
+      ],
+      { session: sess }
+    );
+
+    // 5. ruaj qe votuesi ka votuar ne kete zgjedhje (pa ruajtur kandidatin)
+    voter.votedElections.push(electionId);
     await voter.save({ session: sess });
 
     await sess.commitTransaction();
     sess.endSession();
 
-    return res.status(200).json({
-      message: "Vota u regjistrua me sukses",
-      election: electionId
+    // audit log per vote cast (jashte transaksionit)
+    await auditLogger({
+      req,
+      user: voter,
+      action: "VOTE_CAST",
+      resource: `election:${electionId.toString()}`,
+      metadata: {
+        candidateId: candidateId.toString(),
+      },
     });
+
+    return res.status(200).json(voter.votedElections);
 
   } catch (error) {
     await sess.abortTransaction();

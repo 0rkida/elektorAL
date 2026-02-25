@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const CountyMunicipalityDropdown = ({ active }) => {
+  const API = process.env.REACT_APP_API_URL;
   const [counties, setCounties] = useState([]);
   const [municipalities, setMunicipalities] = useState([]);
 
@@ -10,10 +11,10 @@ const CountyMunicipalityDropdown = ({ active }) => {
 
   // Fetch counties
   useEffect(() => {
-    axios.get("/api/counties")
+    axios.get(`${API}/counties`)
       .then(res => setCounties(res.data))
       .catch(err => console.log(err));
-  }, []);
+  }, [API]);
 
   // Fetch municipalities only when a county is selected
   useEffect(() => {
@@ -22,10 +23,10 @@ const CountyMunicipalityDropdown = ({ active }) => {
       setSelectedMunicipality("");
       return;
     }
-    axios.get(`/api/municipalities/${selectedCounty}`)
+    axios.get(`${API}/municipalities/by-county/${selectedCounty}`)
       .then(res => setMunicipalities(res.data))
       .catch(err => console.log(err));
-  }, [selectedCounty]);
+  }, [selectedCounty, API]);
 
   if (!active) {
     return (

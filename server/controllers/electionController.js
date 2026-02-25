@@ -2,10 +2,12 @@ const {v4 : uuid} = require("uuid")
 const HttpError = require('../models/ErrorModel')
 const cloudinary = require("../utils/cloudinary")
 const path = require("path")
+const mongoose = require("mongoose")
+const auditLogger = require("../utils/auditLogger")
 
 const ElectionModel = require("../models/electionModel")
 const CandidateModel = require("../models/candidateModel")
-
+const VoteModel = require("../models/voteModel")
 
 // ============= ADD NEW ELECTION
 //POST : api/elections/
@@ -78,6 +80,50 @@ const getElections = async (req, res, next) => {
     console.error("GET ELECTIONS ERROR 👉", error);
     return next(
       new HttpError("Nuk mund te merren zgjedhjet.", 500)
+    );
+  }
+};
+// ============= GET ELECTION RESULTS
+//GET : api/elections/:id/results
+//PROTECTED
+const getElectionResults = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const electionObjectId = new mongoose.Types.ObjectId(id);
+
+    const results = await VoteModel.aggregate([
+      { $match: { election: electionObjectId } },
+      {
+        $group: {
+          _id: "$candidate",
+          totalVotes: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          candidateId: "$_id",
+          totalVotes: 1
+        }
+      }
+    ]);
+
+    // audit log per shikimin e rezultateve
+    await auditLogger({
+      req,
+      action: "VIEW_RESULTS",
+      resource: `election:${id}`,
+      metadata: {
+        resultCount: results.length,
+      },
+    });
+
+    return res.status(200).json(results);
+  } catch (error) {
+    console.error("GET ELECTION RESULTS ERROR 👉", error);
+    return next(
+      new HttpError("Nuk mund te merren rezultatet e zgjedhjeve.", 500)
     );
   }
 };
@@ -238,6 +284,6 @@ const updateElection = async (req, res, next) => {
 }
 
 module.exports = {addElection,getElection, getElections, updateElection, removeElection, 
-    getCandidatesOfElection, getElectionVoters}
+    getCandidatesOfElection, getElectionVoters, getElectionResults}
 
 
